@@ -8,6 +8,7 @@ RUN apk add --no-cache \
     git \
     curl \
     mysql-client \
+    zlib-dev \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -44,6 +45,7 @@ WORKDIR /app
 # Install runtime dependencies only
 RUN apk add --no-cache \
     mysql-client \
+    zlib \
     libzip \
     libpng \
     libjpeg-turbo \

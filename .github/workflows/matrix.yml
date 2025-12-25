@@ -64,6 +64,8 @@ jobs:
 
       - name: Create Database
         run: php bin/console doctrine:database:create --env=test --if-not-exists
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/school_test
 
       - name: Run Migrations
         run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
