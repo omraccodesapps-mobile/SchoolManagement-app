@@ -1,0 +1,65 @@
+# ============================================================================
+# Docker Ignore File (.dockerignore)
+# ============================================================================
+# Specifies which files and directories to exclude when building Docker
+# images. This reduces image size and build time.
+# ============================================================================
+
+# Version Control
+.git
+.gitignore
+.gitattributes
+
+# IDE and Editor Files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Project Files
+# Symfony var directory (will be created at runtime)
+var/cache
+var/log
+var/tmp
+
+# Composer and Node
+vendor/
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment
+.env.local
+.env.*.local
+
+# Testing
+.phpunit.cache
+phpunit.xml
+coverage/
+
+# Build artifacts
+dist/
+build/
+
+# Documentation
+docs/
+README.md
+CONTRIBUTING.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Docker files (don't include in image build context)
+docker-compose.*.yml
+Dockerfile.*

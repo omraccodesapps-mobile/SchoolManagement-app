@@ -9,6 +9,13 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+###> doctrine/doctrine-bundle ###
+# SQLite database files (keep directory structure but ignore data files)
+var/data/*.db
+var/data/*.db-wal
+var/data/*.db-shm
+###< doctrine/doctrine-bundle ###
+
 ###> phpunit/phpunit ###
 /phpunit.xml
 /.phpunit.cache/

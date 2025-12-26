@@ -1,0 +1,145 @@
+version: '3.9'
+
+# ============================================================================
+# Docker Compose Configuration for Symfony 7.4 School Management Application
+# ============================================================================
+# Services:
+# - php: PHP 8.2-FPM with SQLite support
+# - nginx: Web server (port 8080)
+# - sqlite: Named volume for database persistence
+#
+# Usage:
+#   docker-compose up -d          # Start services
+#   docker-compose down           # Stop services
+#   docker-compose logs -f php    # View PHP logs
+# ============================================================================
+
+services:
+  # ========================================================================
+  # PHP 8.2-FPM Service
+  # ========================================================================
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    
+    container_name: school-management-php
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Environment variables
+    environment:
+      - APP_ENV=dev
+      - APP_DEBUG=true
+      - DATABASE_URL=sqlite:///%var_dir%/school_management_dev.db
+      - PHP_IDE_CONFIG=serverName=localhost
+    
+    # Volume mounts
+    volumes:
+      # Code directory - sync with host
+      - .:/var/www:cached
+      
+      # Database persistence - SQLite files
+      - sqlite_data:/var/www/var/data
+      
+      # PHP configuration
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/app.ini
+      
+      # Cache directory
+      - php_cache:/var/www/var/cache
+      
+      # Logs directory
+      - php_logs:/var/www/var/log
+    
+    # Networks
+    networks:
+      - school-network
+    
+    # Dependencies
+    depends_on:
+      - nginx
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits
+    # Uncomment to enable
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 256M
+
+  # ========================================================================
+  # Nginx Web Server Service
+  # ========================================================================
+  nginx:
+    image: nginx:alpine
+    
+    container_name: school-management-nginx
+    
+    # Port mapping
+    ports:
+      - "8080:80"
+    
+    # Environment variables
+    environment:
+      - NGINX_PORT=80
+    
+    # Volume mounts
+    volumes:
+      # Code directory
+      - .:/var/www:cached
+      
+      # Nginx configuration
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      
+      # Logs
+      - nginx_logs:/var/log/nginx
+    
+    # Networks
+    networks:
+      - school-network
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# ============================================================================
+# Named Volumes: For data persistence
+# ============================================================================
+volumes:
+  # SQLite database files
+  sqlite_data:
+    driver: local
+  
+  # PHP cache files
+  php_cache:
+    driver: local
+  
+  # PHP logs
+  php_logs:
+    driver: local
+  
+  # Nginx logs
+  nginx_logs:
+    driver: local
+
+# ============================================================================
+# Networks: Service communication
+# ============================================================================
+networks:
+  school-network:
+    driver: bridge

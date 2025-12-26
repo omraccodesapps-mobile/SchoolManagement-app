@@ -1,21 +1,37 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
-
-        # IMPORTANT: You MUST configure your server version,
-        # either here or in the DATABASE_URL env var (see .env file)
-        #server_version: '16'
-
+        
+        # SQLite3 specific options
+        options:
+            # Enable foreign key constraints in SQLite
+            SQLITE_ATTR_FOREIGN_KEYS: true
+        
+        # Connection parameters for SQLite
+        charset: utf8mb4
+        
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+    
     orm:
-        auto_generate_proxy_classes: true
+        # Enable lazy loading with ghost objects (Doctrine 3.4+)
         enable_lazy_ghost_objects: true
+        
+        # Auto-generate proxy classes (disabled in production for performance)
+        auto_generate_proxy_classes: '%kernel.debug%'
+        
+        # Validation and reporting
         report_fields_where_declared: true
         validate_xml_mapping: true
+        
+        # Naming strategy
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        
+        # Identity generation preferences
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
+        
+        # Auto-mapping configuration
         auto_mapping: true
         mappings:
             App:
@@ -24,8 +40,18 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+        
+        # Controller resolver
         controller_resolver:
             auto_mapping: false
+
+when@dev:
+    doctrine:
+        dbal:
+            profiling: true
+        orm:
+            # Enable full logging in development
+            auto_generate_proxy_classes: true
 
 when@test:
     doctrine:
@@ -36,6 +62,7 @@ when@test:
 when@prod:
     doctrine:
         orm:
+            # Disable auto-generation in production for security and performance
             auto_generate_proxy_classes: false
             proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
             query_cache_driver:

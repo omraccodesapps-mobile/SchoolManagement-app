@@ -1,37 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
+<!-- PHPUnit Configuration for Symfony 7 School Management Application
+     Documentation: https://phpunit.readthedocs.io/en/latest/configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          colors="true"
+         stopOnFailure="true"
+         stopOnError="true"
+         stopOnIncomplete="false"
+         stopOnRisky="false"
+         stopOnSkipped="false"
          failOnDeprecation="true"
          failOnNotice="true"
          failOnWarning="true"
+         verbose="true"
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         beStrictAboutTodoTestedCode="true"
 >
+    <!-- ========================================================================
+         PHP Configuration: Server variables and INI settings
+         ======================================================================== -->
     <php>
+        <!-- Display errors during tests -->
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
+        
+        <!-- Symfony Environment Configuration -->
         <server name="APP_ENV" value="test" force="true" />
-        <server name="SHELL_VERBOSITY" value="-1" />
+        <server name="APP_DEBUG" value="false" force="true" />
+        <server name="KERNEL_CLASS" value="App\Kernel" />
+        
+        <!-- Database Configuration: SQLite in-memory for fast tests -->
+        <server name="DATABASE_URL" value="sqlite:///:memory:" force="true" />
+        
+        <!-- Symfony Shell Output -->
+        <server name="SHELL_VERBOSITY" value="0" />
+        
+        <!-- PHPUnit Settings -->
+        <ini name="memory_limit" value="-1" />
     </php>
 
+    <!-- ========================================================================
+         Test Suites: Organized test execution
+         ======================================================================== -->
     <testsuites>
+        <!-- Unit Tests: Fast, isolated tests for individual components -->
+        <testsuite name="Unit Tests">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        
+        <!-- Functional Tests: Tests with full application context -->
+        <testsuite name="Functional Tests">
+            <directory>tests/Functional</directory>
+        </testsuite>
+        
+        <!-- Integration Tests: Tests with database and external services -->
+        <testsuite name="Integration Tests">
+            <directory>tests/Integration</directory>
+        </testsuite>
+        
+        <!-- All Tests: Complete test suite -->
         <testsuite name="Project Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
 
+    <!-- ========================================================================
+         Coverage Configuration: Code coverage analysis
+         ======================================================================== -->
     <source ignoreSuppressionOfDeprecations="true"
+            ignoreSuppressionOfPhpstans="false"
             ignoreIndirectDeprecations="true"
             restrictNotices="true"
             restrictWarnings="true"
     >
+        <!-- Include source code for coverage -->
         <include>
             <directory>src</directory>
         </include>
-
+        
+        <!-- Exclude non-business logic directories -->
+        <exclude>
+            <directory>src/DataFixtures</directory>
+            <directory>src/Kernel.php</directory>
+            <directory>tests</directory>
+        </exclude>
+        
+        <!-- Deprecation handling -->
         <deprecationTrigger>
             <method>Doctrine\Deprecations\Deprecation::trigger</method>
             <method>Doctrine\Deprecations\Deprecation::delegateTriggerToBackend</method>
@@ -39,6 +97,39 @@
         </deprecationTrigger>
     </source>
 
+    <!-- ========================================================================
+         Report Configuration: Coverage report formats
+         ======================================================================== -->
+    <coverage processUncoveredFiles="true"
+              pathCoverage="false"
+              ignoreDeprecatedCodeUnits="true"
+              disableCoverageCaching="false"
+    >
+        <!-- Text Report: Console output -->
+        <report>
+            <text outputFile="php://stdout" showUncoveredFiles="true" showOnlySummary="false" />
+        </report>
+        
+        <!-- HTML Report: Detailed visual coverage -->
+        <report>
+            <html outputDirectory="var/coverage/html" />
+        </report>
+        
+        <!-- Clover Report: CI/CD integration (Codecov, etc.) -->
+        <report>
+            <clover outputFile="var/coverage/clover.xml" />
+        </report>
+        
+        <!-- Cobertura Report: Alternative CI format -->
+        <report>
+            <cobertura outputFile="var/coverage/cobertura.xml" />
+        </report>
+    </coverage>
+
+    <!-- ========================================================================
+         Extensions: Additional functionality
+         ======================================================================== -->
     <extensions>
+        <!-- Symfony Testing Extensions -->
     </extensions>
 </phpunit>

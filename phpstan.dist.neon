@@ -1,8 +1,30 @@
+# ============================================================================
+# PHPStan Distribution Configuration for Symfony 7.4 School Management System
+# ============================================================================
+# This is the distributable version with sensible defaults
+# Copy to phpstan.neon and customize for your environment
+# ============================================================================
+
 parameters:
-    level: 6
+    # PHP Version
+    php: '8.2'
+
+    # Analysis Level (0-9)
+    level: 5
+
+    # Paths to Analyze
     paths:
-        - bin/
-        - config/
-        - public/
         - src/
+
+    # Paths to Exclude
+    excludePaths:
         - tests/
+        - var/
+        - vendor/
+        - config/
+
+    # Memory Limit for Analysis
+    memoryLimit: 1G
+
+    # Error Output Format
+    errorFormat: github

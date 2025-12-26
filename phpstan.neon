@@ -1,13 +1,140 @@
+# ============================================================================
+# PHPStan Configuration for Symfony 7.4 School Management System
+# ============================================================================
+# Level 5: Strict type checking with practical error tolerance
+# Documentation: https://phpstan.org/config-reference
+# ============================================================================
+
+includes:
+    # Symfony extension for better Symfony code analysis
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+    
+    # Doctrine extension for ORM analysis
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+
 parameters:
+    # ========================================================================
+    # PHP Version Configuration
+    # ========================================================================
     php: '8.2'
+
+    # ========================================================================
+    # Analysis Level: 5 (Strict but practical)
+    # Levels: 0 (basic) -> 9 (strict)
+    # ========================================================================
     level: 5
+
+    # ========================================================================
+    # Paths to Analyze
+    # ========================================================================
     paths:
-        - src
-    ignoreErrors:
-        - '#Undefined type#'
-        - '#Undefined method#'
-        - '#Call to unknown method#'
-        - '#Call to undefined method#'
-        - '#Implicitly marking parameter#'
+        - src/
+
+    # ========================================================================
+    # Paths to Exclude from Analysis
+    # ========================================================================
     excludePaths:
-        - tests/bootstrap.php
+        - tests/
+        - var/
+        - vendor/
+        - config/
+
+    # ========================================================================
+    # Bootstrap File: Loaded before analysis
+    # ========================================================================
+    bootstrap:
+        - config/bootstrap.php
+
+    # ========================================================================
+    # Type Checking Features
+    # ========================================================================
+    checkAlwaysTrueCheckTypeFunctionCall: true
+    checkBenevolentUnionTypes: true
+    checkDynamicProperties: true
+    checkMissingIterableValueType: true
+    checkMissingCallableSignature: true
+    checkMissingReturnTypeWhenInheritingMixin: true
+
+    # ========================================================================
+    # Memory and Performance
+    # ========================================================================
+    memoryLimit: 1G
+
+    # ========================================================================
+    # Error Output Format: GitHub Actions integration
+    # ========================================================================
+    errorFormat: github
+
+    # ========================================================================
+    # Type Inference Settings
+    # ========================================================================
+    inferPrivatePropertyTypeFromConstructor: true
+    treatPhpDocTypesAsCertain: true
+    disableMixedTypeInference: false
+
+    # ========================================================================
+    # Generics and Template Types
+    # ========================================================================
+    enableYAMLPhpDocParser: true
+
+    # ========================================================================
+    # Symfony Extension Configuration
+    # ========================================================================
+    symfony:
+        # Container file for service analysis
+        container_xml_path: %currentWorkingDirectory%/var/cache/dev/App_Kernel.xml
+
+    # ========================================================================
+    # Doctrine Extension Configuration
+    # ========================================================================
+    doctrine:
+        # Check Doctrine entity mapping
+        objectManagerLoader: config/doctrine_object_manager_loader.php
+
+    # ========================================================================
+    # Universal Object Crates (Magic Methods)
+    # Allow dynamic properties on specific classes
+    # ========================================================================
+    universalObjectCratesClasses:
+        - stdClass
+        - Throwable
+
+    # ========================================================================
+    # Dynamic Method Calls
+    # Consider certain patterns as dynamic
+    # ========================================================================
+    dynamicConstantNames: []
+
+    # ========================================================================
+    # Ignored Errors: Practical allowances for production code
+    # ========================================================================
+    ignoreErrors:
+        # DataFixtures use magic methods
+        - '#Undefined method Doctrine\\ORM\\EntityManager#'
+        - '#Call to an undefined method Doctrine\\Persistence\\ObjectManager#'
+        
+        # Symfony event dispatcher uses dynamic methods
+        - '#Method Symfony\\Component\\EventDispatcher\\EventDispatcher::#'
+        
+        # Allow some container-related false positives
+        - '#Service ".*" is not registered in the container#'
+        
+        # Doctrine proxy-related
+        - '#Access to an undefined property.*::\$__initializer__#'
+        - '#Access to an undefined property.*::\$__cloner__#'
+        - '#Access to an undefined property.*::\$__isInitialized__#'
+
+    # ========================================================================
+    # PHPDoc Parsing
+    # ========================================================================
+    parsePrivatePropertiesDocComment: true
+    parseProtectedPropertiesDocComment: true
+
+    # ========================================================================
+    # Strictness Settings
+    # ========================================================================
+    implicitThrows: true
+    propertyLazyAssertionHelper: true
+    checkImplicitMixed: true
+    checkExplicitMixedMissingReturn: true

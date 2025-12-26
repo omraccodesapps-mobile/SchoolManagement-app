@@ -2,180 +2,279 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+      - main
   pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
+  workflow_dispatch:
 
 env:
   APP_ENV: test
-  DATABASE_URL: mysql://root:root@127.0.0.1:3306/school_test
+  DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
 
 jobs:
-  code-quality:
-    name: Code Quality & Standards
+  # ============================================================================
+  # SETUP PHASE: Environment preparation and dependency installation
+  # ============================================================================
+  setup:
+    name: Setup Environment
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
       
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mysql, intl, zip, gd, pdo_mysql
+          extensions: intl, pdo_sqlite, zip, json
           tools: composer:v2
-      
-      - name: Cache Composer packages
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
-      
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
-      
-      - name: PHP Syntax Check
-        run: find src -name "*.php" -exec php -l {} \;
-      
-      - name: PHP CS Fixer (Check)
-        run: composer cs-check
-        continue-on-error: true
-      
-      - name: PHPStan (Static Analysis)
-        run: composer stan
-        continue-on-error: true
-
-  tests:
-    name: Unit & Integration Tests
-    runs-on: ubuntu-latest
-    needs: code-quality
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: school_test
-          MYSQL_TCP_PORT: 3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        ports:
-          - 3306:3306
-
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mysql, intl, zip, gd, pdo_mysql, curl, json
           coverage: xdebug
-          tools: composer:v2
 
-      - name: Cache Composer packages
+      - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-suggest
 
-      - name: Setup Test Environment
-        run: cp .env.test .env.test.local
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Wait for MySQL
+      - name: Display PHP version
+        run: php -v
+
+      - name: Display Composer version
+        run: composer --version
+
+      - name: Display Node version
+        run: node --version
+
+  # ============================================================================
+  # VALIDATION PHASE: Code quality and standards checking
+  # ============================================================================
+  validation:
+    name: Code Quality Validation
+    runs-on: ubuntu-latest
+    needs: setup
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, pdo_sqlite, zip, json
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Check PHP syntax
+        run: find src tests -name "*.php" -exec php -l {} \;
+
+      - name: PHP CS Fixer - Check PSR-12 compliance
+        run: composer cs-check || true
+
+      - name: PHPStan - Static Analysis (Level 5)
+        run: composer stan
+
+  # ============================================================================
+  # DATABASE PHASE: Database setup, migrations, and fixtures
+  # ============================================================================
+  database:
+    name: Database Setup
+    runs-on: ubuntu-latest
+    needs: setup
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, pdo_sqlite, zip, json
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Create database directory
+        run: mkdir -p var/data
+
+      - name: Create SQLite database
+        run: php bin/console doctrine:database:create --if-not-exists
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+      - name: Run database migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+      - name: Load test fixtures
+        run: php bin/console doctrine:fixtures:load --no-interaction
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+  # ============================================================================
+  # TESTING PHASE: Unit and functional tests with code coverage
+  # ============================================================================
+  tests:
+    name: Unit & Functional Tests
+    runs-on: ubuntu-latest
+    needs: [setup, database]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: intl, pdo_sqlite, zip, json
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Create database directory
+        run: mkdir -p var/data
+
+      - name: Create test database
+        run: php bin/console doctrine:database:create --if-not-exists
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+      - name: Run migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+      - name: Load fixtures
+        run: php bin/console doctrine:fixtures:load --no-interaction
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+      - name: Run PHPUnit tests with coverage
+        run: php bin/phpunit --coverage-text --coverage-clover coverage.xml
+        env:
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
+
+      - name: Check code coverage
         run: |
-          php -r "
-          \$host = '127.0.0.1';
-          \$port = 3306;
-          \$timeout = 60;
-          \$connected = false;
-          
-          while (!(\$connected) && \$timeout-- > 0) {
-            if (@fsockopen(\$host, \$port)) {
-              \$connected = true;
-              echo 'MySQL is ready!' . PHP_EOL;
-            } else {
-              sleep(1);
-            }
-          }
-          
-          if (!\$connected) {
-            echo 'MySQL connection timeout!';
-            exit(1);
-          }
-          "
-
-      - name: Create Database
-        run: php bin/console doctrine:database:create --env=test --if-not-exists
+          COVERAGE=$(grep -oP 'Lines:\s+\K[\d.]+' <<< "$(php bin/phpunit --coverage-text 2>&1)" || echo "0")
+          echo "Code Coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 75" | bc -l) )); then
+            echo "❌ Code coverage is below 75% threshold"
+            exit 1
+          fi
+          echo "✅ Code coverage meets minimum threshold"
         env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
+          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          APP_ENV: test
 
-      - name: Run Migrations
-        run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
-
-      - name: Load Fixtures
-        run: php bin/console doctrine:fixtures:load --env=test --no-interaction
-        continue-on-error: true
-
-      - name: Run PHPUnit Tests
-        run: php bin/phpunit --testdox --coverage-text
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-
-      - name: Generate Coverage Report
-        run: php bin/phpunit --coverage-clover coverage.xml
-        continue-on-error: true
-
-      - name: Upload Coverage to Codecov
+      - name: Upload coverage reports
+        if: always()
         uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
-          fail_ci_if_error: false
-        continue-on-error: true
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
 
-  build:
-    name: Build & Deployment Check
+  # ============================================================================
+  # ASSETS PHASE: Frontend asset building and optimization
+  # ============================================================================
+  assets:
+    name: Asset Building
     runs-on: ubuntu-latest
-    needs: tests
-
+    needs: setup
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          php-version: '8.2'
-          extensions: mysql, intl, zip, gd, pdo_mysql
-          tools: composer:v2
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-dev
+      - name: Install npm dependencies
+        run: npm ci
 
-      - name: Clear cache
-        run: php bin/console cache:clear --env=prod
+      - name: Build production assets
+        run: npm run build
 
-      - name: Warm cache
-        run: php bin/console cache:warmup --env=prod
+      - name: Verify asset build
+        run: |
+          if [ -d "public/assets" ] || [ -d "assets/vendor" ]; then
+            echo "✅ Assets built successfully"
+          else
+            echo "❌ Asset build verification failed"
+            exit 1
+          fi
 
-      - name: Assets build check
-        run: php bin/console asset-map:compile
-        continue-on-error: true
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: |
-            public/
-            var/cache/
-            var/log/
+  # ============================================================================
+  # FINAL STATUS: Overall CI/CD pipeline status
+  # ============================================================================
+  ci-status:
+    name: CI Pipeline Status
+    runs-on: ubuntu-latest
+    needs: [setup, validation, database, tests, assets]
+    if: always()
+    
+    steps:
+      - name: Check CI Pipeline Status
+        run: |
+          if [ "${{ needs.setup.result }}" = "failure" ] || \
+             [ "${{ needs.validation.result }}" = "failure" ] || \
+             [ "${{ needs.database.result }}" = "failure" ] || \
+             [ "${{ needs.tests.result }}" = "failure" ] || \
+             [ "${{ needs.assets.result }}" = "failure" ]; then
+            echo "❌ CI Pipeline Failed"
+            exit 1
+          fi
+          echo "✅ CI Pipeline Passed"
