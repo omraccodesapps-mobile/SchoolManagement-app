@@ -3,31 +3,618 @@
 {% block title %}Available Courses{% endblock %}
 
 {% block body %}
-<h1>Available Courses</h1>
-<p class="text-muted">Browse and enroll in courses</p>
-
-{% if courses %}
-  <div class="row">
-    {% for course in courses %}
-      <div class="col-md-4 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">{{ course.title }}</h5>
-            <p class="card-text">{{ course.description|slice(0, 100) }}...</p>
-            <p class="text-muted">Teacher: {{ course.teacher.name }}</p>
-            <form method="POST" action="{{ path('app_enrollment_enroll', {courseId: course.id}) }}" style="display:inline;">
-              <input type="hidden" name="_token" value="{{ csrf_token('enroll' ~ course.id) }}">
-              <button type="submit" class="btn btn-success btn-sm">Enroll</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
+<div class="advanced-enrollment-container">
+  <div class="enrollment-header">
+    <div class="header-content">
+      <h1 class="page-title">Discover Courses</h1>
+      <p class="page-subtitle">Explore available courses and start learning today</p>
+    </div>
+    <a href="{{ path('app_student_dashboard') }}" class="back-to-dashboard">
+      <span>← Back to Dashboard</span>
+    </a>
   </div>
-{% else %}
-  <p class="alert alert-info">No available courses at the moment.</p>
-{% endif %}
 
-<hr>
-<a href="{{ path('app_student_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+  {% if courses %}
+    <div class="courses-container">
+      <div class="courses-grid">
+        {% for course in courses %}
+          <div class="course-card" data-course-id="{{ course.id }}">
+            <div class="card-header">
+              <div class="course-icon">📖</div>
+              <div class="card-badge">Available</div>
+            </div>
+
+            <div class="card-content">
+              <h3 class="course-name">{{ course.title }}</h3>
+              
+              <div class="course-instructor">
+                <span class="instructor-icon">👨‍🏫</span>
+                <span>{{ course.teacher.name }}</span>
+              </div>
+
+              <p class="course-description">
+                {{ course.description|slice(0, 100) }}{% if course.description|length > 100 %}...{% endif %}
+              </p>
+
+              <div class="course-meta">
+                <span class="meta-item">
+                  <span class="meta-icon">👥</span>
+                  <span class="meta-text">{{ course.enrollments|length }} enrolled</span>
+                </span>
+                <span class="meta-item">
+                  <span class="meta-icon">⭐</span>
+                  <span class="meta-text">4.8 rating</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <form method="POST" action="{{ path('app_enrollment_enroll', {courseId: course.id}) }}" class="enroll-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('enroll' ~ course.id) }}">
+                <button type="submit" class="enroll-btn">
+                  <span class="btn-icon">✓</span>
+                  <span class="btn-text">Enroll Now</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Card Overlay -->
+            <div class="card-overlay"></div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>No Courses Available</h3>
+      <p>There are no available courses at the moment. Please check back later!</p>
+      <a href="{{ path('app_student_dashboard') }}" class="back-btn">
+        <span>← Return to Dashboard</span>
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Success/Error Toast Messages -->
+<div id="successToast" class="toast-notification success-toast" style="display: none;">
+  <div class="toast-icon">✓</div>
+  <div class="toast-content">
+    <div class="toast-title">Enrolled!</div>
+    <div class="toast-message" id="successMessage"></div>
+  </div>
+  <button class="toast-close">×</button>
+</div>
+
+<div id="errorToast" class="toast-notification error-toast" style="display: none;">
+  <div class="toast-icon">⚠</div>
+  <div class="toast-content">
+    <div class="toast-title">Error</div>
+    <div class="toast-message" id="errorMessage"></div>
+  </div>
+  <button class="toast-close">×</button>
+</div>
+
+<style>
+.advanced-enrollment-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.enrollment-header {
+  max-width: 1200px;
+  margin: 0 auto 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-content {
+  animation: slideInDown 0.6s ease-out;
+}
+
+.page-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  font-size: 16px;
+  color: #7f8c8d;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.back-to-dashboard {
+  padding: 12px 24px;
+  background: white;
+  color: #667eea;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border: 2px solid #e0e0e0;
+  animation: slideInDown 0.6s ease-out 0.1s both;
+}
+
+.back-to-dashboard:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.courses-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scaleIn 0.5s ease-out both;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card:nth-child(1) { animation-delay: 0.1s; }
+.course-card:nth-child(2) { animation-delay: 0.2s; }
+.course-card:nth-child(3) { animation-delay: 0.3s; }
+.course-card:nth-child(n+4) { animation-delay: 0.4s; }
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.course-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.card-header {
+  padding: 24px 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.course-icon {
+  font-size: 40px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.card-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-content {
+  padding: 20px;
+  flex: 1;
+}
+
+.course-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.course-instructor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 16px;
+}
+
+.instructor-icon {
+  font-size: 14px;
+}
+
+.course-description {
+  font-size: 13px;
+  color: #7f8c8d;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.course-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.meta-icon {
+  font-size: 14px;
+}
+
+.card-footer {
+  padding: 0 20px 20px;
+  margin-top: auto;
+}
+
+.enroll-form {
+  width: 100%;
+}
+
+.enroll-btn {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.enroll-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.enroll-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.enroll-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.enroll-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.empty-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.empty-state h3 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 15px;
+  color: #7f8c8d;
+  margin-bottom: 32px;
+}
+
+.back-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  color: white;
+  padding: 16px 24px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 10000;
+  animation: slideInRight 0.4s ease-out;
+  max-width: 400px;
+}
+
+.success-toast {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
+}
+
+.error-toast {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-icon {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 13px;
+  opacity: 0.95;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .enrollment-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .back-to-dashboard {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-title {
+    font-size: 32px;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state {
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    font-size: 64px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const enrollForms = document.querySelectorAll('.enroll-form');
+  
+  enrollForms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const button = form.querySelector('.enroll-btn');
+      const courseName = form.closest('.course-card').querySelector('.course-name').textContent;
+      
+      // Show loading state
+      const originalHtml = button.innerHTML;
+      button.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">Enrolling...</span>';
+      button.disabled = true;
+      
+      // Simulate enrollment process
+      setTimeout(() => {
+        // Submit the form
+        form.submit();
+        
+        // Optional: Show success message
+        showSuccessMessage(`You're now enrolled in "${courseName}"!`);
+      }, 800);
+    });
+  });
+});
+
+function showSuccessMessage(message) {
+  const toast = document.getElementById('successToast');
+  const messageEl = document.getElementById('successMessage');
+  
+  if (toast && messageEl) {
+    messageEl.textContent = message;
+    toast.style.display = 'flex';
+    toast.style.animation = 'slideInRight 0.4s ease-out';
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', function() {
+      dismissToast(toast);
+    });
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+      dismissToast(toast);
+    }, 5000);
+  }
+}
+
+function showErrorMessage(message) {
+  const toast = document.getElementById('errorToast');
+  const messageEl = document.getElementById('errorMessage');
+  
+  if (toast && messageEl) {
+    messageEl.textContent = message;
+    toast.style.display = 'flex';
+    toast.style.animation = 'slideInRight 0.4s ease-out';
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', function() {
+      dismissToast(toast);
+    });
+    
+    setTimeout(() => {
+      dismissToast(toast);
+    }, 5000);
+  }
+}
+
+function dismissToast(toast) {
+  toast.style.animation = 'slideOutRight 0.4s ease-out';
+  setTimeout(() => {
+    toast.style.display = 'none';
+  }, 400);
+}
+
+// Add slideOutRight animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideOutRight {
+    to {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+  }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}

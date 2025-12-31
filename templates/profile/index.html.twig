@@ -1,0 +1,366 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile - My Account{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+  <div class="profile-wrapper">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-banner">
+        <div class="welcome-content">
+          <h1 class="welcome-title">Welcome Back, {{ user.name ?? user.email }}</h1>
+          <p class="welcome-subtitle">
+            {% if isStudent and isTeacher %}
+              You are registered as both a Student and Teacher
+            {% elseif isStudent %}
+              You are registered as a Student
+            {% elseif isTeacher %}
+              You are registered as a Teacher
+            {% endif %}
+          </p>
+        </div>
+        <div class="welcome-icon">
+          {% if isStudent and isTeacher %}
+            📚👨‍🏫
+          {% elseif isStudent %}
+            📚
+          {% elseif isTeacher %}
+            👨‍🏫
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Cards -->
+    <div class="profile-cards">
+      <!-- User Information Card -->
+      <div class="profile-card">
+        <div class="card-header">
+          <h2 class="card-title">Account Information</h2>
+          <span class="card-icon">👤</span>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <label class="info-label">Email:</label>
+            <span class="info-value">{{ user.email }}</span>
+          </div>
+          <div class="info-row">
+            <label class="info-label">Full Name:</label>
+            <span class="info-value">{{ user.name ?? 'Not set' }}</span>
+          </div>
+          <div class="info-row">
+            <label class="info-label">Account Type:</label>
+            <span class="info-value">
+              {% if isStudent %}
+                <span class="badge badge-student">Student</span>
+              {% endif %}
+              {% if isTeacher %}
+                <span class="badge badge-teacher">Teacher</span>
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="{{ path('app_profile_edit') }}" class="btn btn-secondary">Edit Profile</a>
+        </div>
+      </div>
+
+      <!-- Student Info Card -->
+      {% if isStudent %}
+      <div class="profile-card">
+        <div class="card-header">
+          <h2 class="card-title">Student Dashboard</h2>
+          <span class="card-icon">📚</span>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <label class="info-label">Enrolled Courses:</label>
+            <span class="info-value">{{ user.enrollments|length }}</span>
+          </div>
+          <div class="info-row">
+            <label class="info-label">Status:</label>
+            <span class="info-value">
+              <span class="badge badge-active">Active</span>
+            </span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="{{ path('app_student_dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Teacher Info Card -->
+      {% if isTeacher %}
+      <div class="profile-card">
+        <div class="card-header">
+          <h2 class="card-title">Teacher Dashboard</h2>
+          <span class="card-icon">👨‍🏫</span>
+        </div>
+        <div class="card-content">
+          <div class="info-row">
+            <label class="info-label">Created Courses:</label>
+            <span class="info-value">{{ user.courses|length }}</span>
+          </div>
+          <div class="info-row">
+            <label class="info-label">Status:</label>
+            <span class="info-value">
+              <span class="badge badge-active">Active</span>
+            </span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="{{ path('app_teacher_dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.profile-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-section {
+  margin-bottom: 40px;
+}
+
+.welcome-banner {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  animation: slideInDown 0.8s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-content {
+  flex: 1;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+  font-size: 16px;
+  color: #666;
+}
+
+.welcome-icon {
+  font-size: 60px;
+  margin-left: 30px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.profile-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.profile-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  animation: slideInUp 0.6s ease-out both;
+}
+
+.profile-card:nth-child(1) { animation-delay: 0.1s; }
+.profile-card:nth-child(2) { animation-delay: 0.2s; }
+.profile-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.card-icon {
+  font-size: 30px;
+}
+
+.card-content {
+  padding: 25px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-student {
+  background: rgba(102, 126, 234, 0.2);
+  color: #667eea;
+}
+
+.badge-teacher {
+  background: rgba(118, 75, 162, 0.2);
+  color: #764ba2;
+}
+
+.badge-active {
+  background: rgba(46, 213, 115, 0.2);
+  color: #2ed573;
+}
+
+.card-footer {
+  padding: 0 25px 25px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  flex: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .welcome-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .welcome-icon {
+    margin-left: 0;
+    margin-top: 20px;
+  }
+
+  .welcome-title {
+    font-size: 24px;
+  }
+
+  .profile-cards {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}

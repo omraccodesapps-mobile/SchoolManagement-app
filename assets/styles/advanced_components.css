@@ -1,0 +1,424 @@
+/**
+ * Advanced UI Components - Animation Library
+ * Tailwind CSS + Custom Animations
+ * 
+ * This file contains all animation definitions, easing functions,
+ * and custom utilities for the advanced components
+ */
+
+/* ============================================================================
+   KEYFRAME ANIMATIONS
+   ========================================================================== */
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(400px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(400px) scale(0.9);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes rotateSpinner {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================================================
+   EASING FUNCTIONS (CSS custom properties for reusability)
+   ========================================================================== */
+
+:root {
+    /* Standard easing functions */
+    --ease-linear: linear;
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Custom easing for specific animations */
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-bounce-out: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Durations */
+    --duration-fast: 150ms;
+    --duration-base: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 400ms;
+    
+    /* Animation timing */
+    --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+
+/* Animations */
+.animate-slideInRight {
+    animation: slideInRight var(--duration-slow) var(--animation-timing);
+}
+
+.animate-slideOutRight {
+    animation: slideOutRight var(--duration-slow) var(--animation-timing);
+}
+
+.animate-slideDown {
+    animation: slideDown var(--duration-slow) var(--animation-timing);
+}
+
+.animate-slideUp {
+    animation: slideUp var(--duration-slow) var(--animation-timing);
+}
+
+.animate-scaleIn {
+    animation: scaleIn var(--duration-slow) var(--animation-timing);
+}
+
+.animate-scaleOut {
+    animation: scaleOut var(--duration-slow) var(--animation-timing);
+}
+
+.animate-fadeIn {
+    animation: fadeIn var(--duration-base) var(--animation-timing);
+}
+
+.animate-fadeOut {
+    animation: fadeOut var(--duration-base) var(--animation-timing);
+}
+
+.animate-bounce-subtle {
+    animation: bounce var(--duration-slow) var(--animation-timing) infinite;
+}
+
+.animate-shimmer {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+.animate-spin-slow {
+    animation: rotateSpinner 3s linear infinite;
+}
+
+/* Transitions */
+.transition-smooth {
+    transition: all var(--duration-slow) var(--animation-timing);
+}
+
+.transition-fast {
+    transition: all var(--duration-fast) var(--animation-timing);
+}
+
+.transition-slow {
+    transition: all var(--duration-slower) var(--animation-timing);
+}
+
+/* Transform utilities */
+.transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.hover-lift {
+    transition: transform var(--duration-base) var(--animation-timing),
+                box-shadow var(--duration-base) var(--animation-timing);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.hover-scale {
+    transition: transform var(--duration-base) var(--animation-timing);
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.active-press {
+    transition: transform var(--duration-fast) var(--animation-timing);
+}
+
+.active-press:active {
+    transform: scale(0.98);
+}
+
+/* Focus states */
+.focus-ring {
+    transition: outline var(--duration-base) var(--animation-timing);
+}
+
+.focus-ring:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Loading states */
+.loading-pulse {
+    animation: pulse var(--duration-slower) var(--animation-timing) infinite;
+}
+
+.loading-spinner {
+    animation: rotateSpinner 1s linear infinite;
+}
+
+/* ============================================================================
+   COMPONENT-SPECIFIC ANIMATIONS
+   ========================================================================== */
+
+/* Modal animations */
+.modal-enter {
+    animation: scaleIn var(--duration-slow) var(--animation-timing);
+}
+
+.modal-exit {
+    animation: scaleOut var(--duration-slow) var(--animation-timing);
+}
+
+/* Dropdown animations */
+.dropdown-enter {
+    animation: slideDown var(--duration-base) var(--animation-timing);
+    transform-origin: top;
+}
+
+.dropdown-exit {
+    animation: slideUp var(--duration-base) var(--animation-timing);
+    transform-origin: top;
+}
+
+/* Toast animations */
+.toast-enter {
+    animation: slideInRight var(--duration-base) var(--animation-timing);
+}
+
+.toast-exit {
+    animation: slideOutRight var(--duration-base) var(--animation-timing);
+}
+
+/* Form field animations */
+.field-error {
+    animation: slideDown var(--duration-base) var(--animation-timing);
+    border-color: #ef4444;
+}
+
+.field-success {
+    animation: slideDown var(--duration-base) var(--animation-timing);
+    border-color: #10b981;
+}
+
+/* Collapse animations */
+.collapse-enter {
+    animation: slideDown var(--duration-slow) var(--animation-timing);
+}
+
+.collapse-exit {
+    animation: slideUp var(--duration-slow) var(--animation-timing);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .hover-lift:hover {
+        transform: none;
+    }
+    
+    .hover-scale:hover {
+        transform: none;
+    }
+    
+    .active-press:active {
+        transform: none;
+    }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --animate-gradient: linear-gradient(
+            90deg,
+            #1f2937 25%,
+            #374151 50%,
+            #1f2937 75%
+        );
+    }
+}
+
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ========================================================================== */
+
+/* Use GPU acceleration for animated elements */
+.will-animate {
+    will-change: transform, opacity;
+}
+
+/* Optimize transform animations */
+.transform-origin-center {
+    transform-origin: center;
+}
+
+.transform-origin-top {
+    transform-origin: top;
+}
+
+.transform-origin-bottom {
+    transform-origin: bottom;
+}
+
+/* ============================================================================
+   RESPONSIVE ANIMATIONS
+   ========================================================================== */
+
+/* Reduce animation on smaller screens */
+@media (max-width: 640px) {
+    :root {
+        --duration-slow: 200ms;
+        --duration-slower: 300ms;
+    }
+    
+    /* Subtle animations only on mobile */
+    .animate-bounce-subtle {
+        animation: bounce var(--duration-base) var(--animation-timing) infinite;
+    }
+}
+
+/* Full animations on larger screens */
+@media (min-width: 1024px) {
+    .hover-lift {
+        transition: transform var(--duration-base) var(--animation-timing),
+                    box-shadow var(--duration-base) var(--animation-timing);
+    }
+}

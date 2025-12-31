@@ -1,18 +1,766 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Register - Join Us{% endblock %}
 
 {% block body %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <h1>Register</h1>
-    {{ form_start(registrationForm) }}
-      <div class="mb-3">{{ form_row(registrationForm.email) }}</div>
-      <div class="mb-3">{{ form_row(registrationForm.name) }}</div>
-      <div class="mb-3">{{ form_row(registrationForm.plainPassword) }}</div>
-      <div class="mb-3">{{ form_row(registrationForm.roles) }}</div>
-      <button class="btn btn-success">Register</button>
-    {{ form_end(registrationForm) }}
+<div class="advanced-register-container">
+  <div class="advanced-register-wrapper" data-controller="advanced-form">
+    <!-- Left Decorative Section -->
+    <div class="advanced-register-decoration">
+      <div class="decoration-blur-1"></div>
+      <div class="decoration-blur-2"></div>
+      <div class="decoration-content">
+        <h2>Welcome to Our Platform</h2>
+        <p>Join thousands of students and teachers transforming education</p>
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Interactive Learning</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Real-time Collaboration</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Advanced Analytics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Section -->
+    <div class="advanced-register-form-section">
+      <div class="form-header">
+        <h1 class="form-title">Create Account</h1>
+        <p class="form-subtitle">Start your journey today</p>
+      </div>
+
+      {{ form_start(registrationForm, {'attr': {'class': 'advanced-register-form', 'data-advanced-form-target': 'form', 'novalidate': false}}) }}
+        
+        <!-- Email Field -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label for="{{ registrationForm.email.vars.id }}" class="advanced-form-label">Email Address</label>
+          <div class="advanced-input-wrapper{% if registrationForm.email.vars.errors %} has-error{% endif %}">
+            {{ form_widget(registrationForm.email, {'attr': {'class': 'advanced-form-input', 'placeholder': 'you@example.com'}}) }}
+            <span class="input-icon">✉</span>
+            <div class="input-indicator"></div>
+          </div>
+          {% if registrationForm.email.vars.errors %}
+            <div class="advanced-error-box">
+              <span class="error-icon">⚠️</span>
+              <div class="error-content">
+                <div class="error-title">Email Already Exists</div>
+                {% for error in registrationForm.email.vars.errors %}
+                  <div class="error-message">{{ error.message }}</div>
+                {% endfor %}
+                <div class="error-suggestion">💡 <a href="{{ path('app_login') }}" class="error-link">Login to your existing account</a></div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Name Field -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label for="{{ registrationForm.name.vars.id }}" class="advanced-form-label">Full Name</label>
+          <div class="advanced-input-wrapper">
+            {{ form_widget(registrationForm.name, {'attr': {'class': 'advanced-form-input', 'placeholder': 'Your full name'}}) }}
+            <span class="input-icon">👤</span>
+            <div class="input-indicator"></div>
+          </div>
+          {% if registrationForm.name.vars.errors %}
+            {% for error in registrationForm.name.vars.errors %}
+              <span class="advanced-form-error">{{ error.message }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Password Field -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label for="{{ registrationForm.plainPassword.vars.id }}" class="advanced-form-label">Password</label>
+          <div class="advanced-input-wrapper">
+            {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'advanced-form-input', 'placeholder': 'Minimum 8 characters'}}) }}
+            <span class="input-icon toggle-password">👁</span>
+            <div class="input-indicator"></div>
+          </div>
+          <div class="password-strength">
+            <div class="strength-bar"><div class="strength-fill"></div></div>
+            <span class="strength-text">Password strength: <span class="strength-level">None</span></span>
+          </div>
+          {% if registrationForm.plainPassword.vars.errors %}
+            {% for error in registrationForm.plainPassword.vars.errors %}
+              <span class="advanced-form-error">{{ error.message }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Role Selection -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label class="advanced-form-label">Select Your Role</label>
+          <div class="role-selector">
+            {% for child in registrationForm.roles %}
+              <label class="role-option">
+                {{ form_widget(child, {'attr': {'class': 'role-radio'}}) }}
+                <span class="role-badge">
+                  <span class="role-icon">{{ child.vars.value == 'ROLE_STUDENT' ? '📚' : '👨‍🏫' }}</span>
+                  <span class="role-name">{{ child.vars.label }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+          {% if registrationForm.roles.vars.errors %}
+            {% for error in registrationForm.roles.vars.errors %}
+              <span class="advanced-form-error">{{ error.message }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="advanced-register-btn" data-advanced-form-target="submitBtn">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-icon">→</span>
+        </button>
+
+        <!-- Login Link -->
+        <div class="form-footer">
+          <p>Already have an account? <a href="{{ path('app_login') }}" class="login-link">Login here</a></p>
+        </div>
+
+      {{ form_rest(registrationForm) }}
+    </div>
   </div>
 </div>
+
+<style>
+.advanced-register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.advanced-register-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1100px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.advanced-register-decoration {
+  position: relative;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.decoration-blur-1, .decoration-blur-2 {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: float 6s ease-in-out infinite;
+}
+
+.decoration-blur-1 {
+  width: 300px;
+  height: 300px;
+  background: white;
+  top: -100px;
+  right: -100px;
+}
+
+.decoration-blur-2 {
+  width: 200px;
+  height: 200px;
+  background: white;
+  bottom: -50px;
+  left: -50px;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(20px); }
+}
+
+.decoration-content {
+  position: relative;
+  z-index: 1;
+}
+
+.decoration-content h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  animation: slideInDown 0.8s ease-out;
+}
+
+.decoration-content p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 40px;
+  animation: slideInDown 0.8s ease-out 0.1s both;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  animation: slideInLeft 0.8s ease-out both;
+}
+
+.feature-item:nth-child(2) { animation-delay: 0.2s; }
+.feature-item:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.advanced-register-form-section {
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: slideInRight 0.8s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.form-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-subtitle {
+  color: #999;
+  font-size: 14px;
+}
+
+.advanced-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.advanced-form-group {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.advanced-form-group:nth-child(1) { animation-delay: 0.1s; }
+.advanced-form-group:nth-child(2) { animation-delay: 0.2s; }
+.advanced-form-group:nth-child(3) { animation-delay: 0.3s; }
+.advanced-form-group:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.advanced-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.advanced-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.advanced-input-wrapper.has-error .advanced-form-input {
+  border-color: #e74c3c;
+  background: #fff5f5;
+}
+
+.advanced-form-input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.advanced-form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.advanced-form-input:focus.has-error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+}
+
+.advanced-form-input::placeholder {
+  color: #ccc;
+}
+
+.input-icon {
+  position: absolute;
+  right: 12px;
+  color: #999;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.input-icon.toggle-password:hover {
+  color: #667eea;
+}
+
+.input-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+.advanced-form-input:focus ~ .input-indicator {
+  width: 100%;
+}
+
+.advanced-error-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%);
+  border: 2px solid #e74c3c;
+  border-radius: 12px;
+  margin-top: 12px;
+  animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.error-title {
+  font-weight: 700;
+  color: #c0392b;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.error-suggestion {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.error-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.error-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.advanced-form-error {
+  display: block;
+  font-size: 12px;
+  color: #e74c3c;
+  margin-top: 6px;
+  animation: shake 0.3s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.password-strength {
+  margin-top: 8px;
+}
+
+.strength-bar {
+  height: 3px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-text {
+  font-size: 12px;
+  color: #999;
+}
+
+.strength-level {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.role-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.role-option input[type="radio"] {
+  display: none;
+}
+
+.role-option input[type="checkbox"] {
+  display: none;
+}
+
+.role-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.role-option input:checked ~ .role-badge {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: scale(1.02);
+}
+
+.role-icon {
+  font-size: 32px;
+}
+
+.role-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.advanced-register-btn {
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.advanced-register-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.advanced-register-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.advanced-register-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.advanced-register-btn:active {
+  transform: translateY(0);
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.advanced-register-btn:hover .btn-icon {
+  transform: translateX(4px);
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #666;
+}
+
+.login-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.login-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #667eea;
+  transition: width 0.3s ease;
+}
+
+.login-link:hover::after {
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .advanced-register-wrapper {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .advanced-register-decoration {
+    padding: 40px 20px;
+    min-height: 300px;
+  }
+
+  .advanced-register-form-section {
+    padding: 40px 20px;
+  }
+
+  .decoration-content h2 {
+    font-size: 24px;
+  }
+
+  .role-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .form-title {
+    font-size: 24px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Toggle password visibility
+  const togglePassword = document.querySelector('.toggle-password');
+  const passwordInput = document.querySelector('#password');
+  
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', function() {
+      passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+      this.textContent = passwordInput.type === 'password' ? '👁' : '👁‍🗨';
+    });
+  }
+
+  // Password strength indicator
+  if (passwordInput) {
+    passwordInput.addEventListener('input', function() {
+      const strength = calculatePasswordStrength(this.value);
+      updateStrengthIndicator(strength);
+    });
+  }
+
+  // Enforce single role selection (radio button behavior)
+  const roleCheckboxes = document.querySelectorAll('.role-radio');
+  roleCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        roleCheckboxes.forEach(cb => {
+          if (cb !== this) {
+            cb.checked = false;
+          }
+        });
+      }
+    });
+  });
+
+  // Add focus animations
+  const inputs = document.querySelectorAll('.advanced-form-input');
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.style.transform = 'scale(1.01)';
+    });
+    input.addEventListener('blur', function() {
+      this.parentElement.style.transform = 'scale(1)';
+    });
+  });
+});
+
+function calculatePasswordStrength(password) {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+  if (password.match(/[0-9]/)) strength++;
+  if (password.match(/[^a-zA-Z0-9]/)) strength++;
+  return strength;
+}
+
+function updateStrengthIndicator(strength) {
+  const fill = document.querySelector('.strength-fill');
+  const level = document.querySelector('.strength-level');
+  
+  if (!fill || !level) return;
+
+  const colors = ['#e0e0e0', '#f39c12', '#f1c40f', '#27ae60'];
+  const levels = ['None', 'Weak', 'Fair', 'Strong'];
+  
+  fill.style.width = (strength * 25) + '%';
+  fill.style.background = colors[strength];
+  level.textContent = levels[strength];
+  level.style.color = colors[strength];
+}
+</script>
 {% endblock %}

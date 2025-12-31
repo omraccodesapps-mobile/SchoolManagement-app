@@ -1,0 +1,75 @@
+{# Advanced Collapsible Section Component #}
+{# Smooth expand/collapse animations with accessibility features #}
+
+<div 
+    class="border-b border-gray-200 transition-colors duration-300 hover:border-gray-300"
+    data-controller="advanced-collapse"
+    data-advanced-collapse-open-value="false"
+>
+    {# Collapse header (button) #}
+    <button
+        type="button"
+        class="group flex w-full items-center justify-between px-6 py-4 text-left transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+        data-action="advanced-collapse#toggle"
+        data-advanced-collapse-target="trigger"
+        aria-expanded="false"
+        aria-controls="collapse-content-{{ id | default('collapse') }}"
+    >
+        {# Title section #}
+        <div class="flex-1">
+            <h3 class="text-base font-semibold text-gray-900">
+                {{ title | default('Collapsible Section') }}
+            </h3>
+            {% if subtitle %}
+                <p class="mt-1 text-sm text-gray-600">{{ subtitle }}</p>
+            {% endif %}
+        </div>
+
+        {# Icon with rotation animation #}
+        <div class="ml-4 flex-shrink-0">
+            <svg 
+                class="h-5 w-5 text-gray-400 transition-transform duration-300"
+                data-advanced-collapse-target="indicator"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </button>
+
+    {# Collapse content #}
+    <div 
+        id="collapse-content-{{ id | default('collapse') }}"
+        data-advanced-collapse-target="content"
+        class="overflow-hidden"
+        style="max-height: 0; opacity: 0; transition: max-height 0.3s ease-out, opacity 0.3s ease-out;"
+        role="region"
+    >
+        <div class="space-y-4 bg-gray-50 px-6 py-4">
+            {% if content is defined %}
+                {{ content | raw }}
+            {% else %}
+                <p class="text-sm text-gray-600">{{ text | default('No content provided') }}</p>
+            {% endif %}
+
+            {# Footer action (optional) #}
+            {% if action %}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 transition-colors duration-200 hover:text-blue-700 focus:outline-none focus:underline"
+                        data-action="advanced-collapse#handleAction"
+                    >
+                        {{ action.label }}
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

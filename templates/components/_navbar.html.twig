@@ -1,31 +1,174 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light navbar-custom">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">School</a>
+    <a class="navbar-brand" href="/">
+      <span class="brand-icon">🎓</span>
+      School
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item">
+          <a class="nav-link {% if app.current_route == 'app_home' %}active{% endif %}" href="/">
+            <span class="nav-icon">🏠</span>
+            Home
+          </a>
+        </li>
         {% if app.user and is_granted('ROLE_STUDENT') %}
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_enrollment_available') }}">Browse Courses</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_student_grades') }}">My Grades</a></li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_enrollment_available' %}active{% endif %}" href="{{ path('app_enrollment_available') }}">
+              <span class="nav-icon">📚</span>
+              Browse Courses
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_student_grades' %}active{% endif %}" href="{{ path('app_student_grades') }}">
+              <span class="nav-icon">📊</span>
+              My Grades
+            </a>
+          </li>
         {% endif %}
         {% if app.user and is_granted('ROLE_TEACHER') %}
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_course_index') }}">Manage Courses</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_grade_index') }}">Manage Grades</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_statistic_index') }}">Statistics</a></li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_course_index' %}active{% endif %}" href="{{ path('app_course_index') }}">
+              <span class="nav-icon">📖</span>
+              Manage Courses
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_grade_index' %}active{% endif %}" href="{{ path('app_grade_index') }}">
+              <span class="nav-icon">✏️</span>
+              Manage Grades
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_statistic_index' %}active{% endif %}" href="{{ path('app_statistic_index') }}">
+              <span class="nav-icon">📈</span>
+              Statistics
+            </a>
+          </li>
         {% endif %}
       </ul>
       <ul class="navbar-nav">
         {% if app.user %}
-          <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_logout') }}">Logout</a></li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_profile' %}active{% endif %}" href="{{ path('app_profile') }}">
+              <span class="nav-icon">👤</span>
+              Profile
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link logout-link" href="{{ path('app_logout') }}">
+              <span class="nav-icon">🚪</span>
+              Logout
+            </a>
+          </li>
         {% else %}
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_login') }}">Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ path('app_register') }}">Register</a></li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_login' %}active{% endif %}" href="{{ path('app_login') }}">
+              <span class="nav-icon">🔓</span>
+              Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if app.current_route == 'app_register' %}active{% endif %}" href="{{ path('app_register') }}">
+              <span class="nav-icon">✍️</span>
+              Register
+            </a>
+          </li>
         {% endif %}
       </ul>
     </div>
   </div>
 </nav>
+
+<style>
+.navbar-custom {
+  background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 20px;
+  color: #333 !important;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: #667eea !important;
+  transform: scale(1.05);
+}
+
+.brand-icon {
+  margin-right: 8px;
+}
+
+.nav-icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.navbar-nav .nav-link {
+  color: #666 !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 8px 12px !important;
+  margin: 0 4px;
+  border-radius: 8px;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #667eea !important;
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.navbar-nav .nav-link.active {
+  color: white !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  font-weight: 600;
+}
+
+.navbar-nav .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.2); }
+}
+
+.navbar-nav .logout-link {
+  color: #e74c3c !important;
+}
+
+.navbar-nav .logout-link:hover {
+  color: #c0392b !important;
+  background: rgba(231, 76, 60, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .navbar-nav .nav-link {
+    padding: 10px 0 !important;
+  }
+
+  .navbar-nav .nav-link.active::after {
+    display: none;
+  }
+}
+</style>

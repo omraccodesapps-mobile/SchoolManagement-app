@@ -1,0 +1,422 @@
+{# Advanced UI Components Demo Page #}
+{# Comprehensive showcase of all advanced components with animations #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced UI Components Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Global animation utilities */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-slideDown {
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-slideUp {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-fadeInScale {
+            animation: fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Smooth page transitions */
+        body {
+            transition: background-color 0.3s ease;
+        }
+
+        /* Focus visible states for accessibility */
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-12 text-center">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4 animate-slideDown">
+                    Advanced UI Components
+                </h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Modern, accessible, and animated components built with Symfony, Stimulus, and Tailwind CSS
+                </p>
+            </div>
+
+            <!-- Grid of components -->
+            <div class="space-y-12">
+                <!-- Section: Advanced Cards -->
+                <section class="animate-slideUp">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Interactive Cards</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Card 1 -->
+                        <div 
+                            class="group relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:border-blue-300 p-6"
+                            data-controller="advanced-card"
+                        >
+                            <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                            
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900">Feature Card</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Hover to see animations</p>
+                                </div>
+                                <div class="flex-shrink-0 transform transition-transform duration-300 group-hover:scale-110">
+                                    <div class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p class="mb-4 text-sm text-gray-600">This card demonstrates smooth hover effects, subtle scale transforms, and elegant color transitions.</p>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div class="rounded-lg bg-gray-50 p-3 transition-all duration-200 hover:bg-blue-50">
+                                    <div class="text-xs font-medium text-gray-600">Status</div>
+                                    <div class="mt-1 text-lg font-bold text-gray-900">Active</div>
+                                </div>
+                                <div class="rounded-lg bg-gray-50 p-3 transition-all duration-200 hover:bg-blue-50">
+                                    <div class="text-xs font-medium text-gray-600">Score</div>
+                                    <div class="mt-1 text-lg font-bold text-gray-900">9.2</div>
+                                </div>
+                            </div>
+                            
+                            <button class="w-full rounded-lg bg-blue-600 text-white py-2 text-sm font-medium transition-all duration-200 hover:bg-blue-700 active:scale-95">
+                                Learn More
+                            </button>
+                        </div>
+
+                        <!-- Card 2 with loading state demo -->
+                        <div 
+                            class="group relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:border-blue-300 p-6"
+                            data-controller="advanced-card"
+                            data-animation-duration="300"
+                        >
+                            <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                            
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900">Loading State</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Click to see skeleton loading</p>
+                                </div>
+                            </div>
+                            
+                            <p class="mb-4 text-sm text-gray-600">Demonstrates animated skeleton loading states with smooth transitions.</p>
+                            
+                            <button 
+                                onclick="this.closest('[data-controller=advanced-card]').__stimulus__.application.getControllerForElementAndIdentifier(this.closest('[data-controller=advanced-card]'), 'advanced-card').showLoading()"
+                                class="w-full rounded-lg bg-blue-600 text-white py-2 text-sm font-medium transition-all duration-200 hover:bg-blue-700 active:scale-95"
+                            >
+                                Show Loading
+                            </button>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div 
+                            class="group relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:border-blue-300 p-6"
+                        >
+                            <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                            
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900">Micro-interactions</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Smooth animations on every interaction</p>
+                                </div>
+                            </div>
+                            
+                            <p class="mb-4 text-sm text-gray-600">Scale transforms, color transitions, and icon rotations create delightful micro-interactions.</p>
+                            
+                            <button 
+                                onclick="window.advancedToast.success('Great!', 'This is a success notification')"
+                                class="w-full rounded-lg bg-blue-600 text-white py-2 text-sm font-medium transition-all duration-200 hover:bg-blue-700 active:scale-95"
+                            >
+                                Show Toast
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Forms with Validation -->
+                <section class="animate-slideUp" style="animation-delay: 100ms;">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Form with Real-time Validation</h2>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                        <form 
+                            class="space-y-6"
+                            data-controller="advanced-form"
+                            onsubmit="event.preventDefault(); window.advancedToast.success('Form Submitted', 'Your form has been submitted successfully!')"
+                        >
+                            <!-- Name field -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-900">
+                                    Full Name
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        type="text"
+                                        name="name"
+                                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-all duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                        placeholder="John Doe"
+                                        data-controller="advanced-form"
+                                        data-validation="required|min:3"
+                                    />
+                                </div>
+                                <p class="text-xs text-gray-500">Minimum 3 characters required</p>
+                            </div>
+
+                            <!-- Email field -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-900">
+                                    Email Address
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        type="email"
+                                        name="email"
+                                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-all duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                        placeholder="john@example.com"
+                                        data-validation="required|email"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Message field -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-900">
+                                    Message
+                                </label>
+                                <textarea 
+                                    name="message"
+                                    rows="4"
+                                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-all duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+                                    placeholder="Your message here..."
+                                    data-validation="max:500"
+                                ></textarea>
+                                <p class="text-xs text-gray-500">Maximum 500 characters</p>
+                            </div>
+
+                            <!-- Submit button -->
+                            <button 
+                                type="submit"
+                                class="w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
+                            >
+                                Submit Form
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Section: Collapsible Content -->
+                <section class="animate-slideUp" style="animation-delay: 200ms;">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Collapsible Sections</h2>
+                    <div class="space-y-0 border border-gray-200 rounded-lg overflow-hidden bg-white">
+                        <!-- Collapse 1 -->
+                        <div data-controller="advanced-collapse">
+                            <button 
+                                type="button"
+                                class="group flex w-full items-center justify-between px-6 py-4 text-left transition-all duration-200 hover:bg-gray-50"
+                                data-action="advanced-collapse#toggle"
+                            >
+                                <div class="flex-1">
+                                    <h3 class="text-base font-semibold text-gray-900">What are smooth animations?</h3>
+                                    <p class="mt-1 text-sm text-gray-600">Learn about animation best practices</p>
+                                </div>
+                                <svg class="h-5 w-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                            </button>
+                            <div 
+                                class="overflow-hidden"
+                                style="max-height: 0; opacity: 0; transition: max-height 0.3s ease-out, opacity 0.3s ease-out;"
+                            >
+                                <div class="space-y-4 bg-gray-50 px-6 py-4 border-t border-gray-200">
+                                    <p class="text-sm text-gray-600">
+                                        Smooth animations enhance user experience by providing visual feedback and creating fluid interactions. Use cubic-bezier easing functions for natural movement. Keep animations between 200-400ms for responsiveness.
+                                    </p>
+                                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                                        <p class="text-xs font-medium text-blue-900">💡 Tip: Use CSS transforms (translate, scale, rotate) for better performance than animating dimensions.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Collapse 2 -->
+                        <div data-controller="advanced-collapse" class="border-t border-gray-200">
+                            <button 
+                                type="button"
+                                class="group flex w-full items-center justify-between px-6 py-4 text-left transition-all duration-200 hover:bg-gray-50"
+                                data-action="advanced-collapse#toggle"
+                            >
+                                <div class="flex-1">
+                                    <h3 class="text-base font-semibold text-gray-900">Accessibility features</h3>
+                                    <p class="mt-1 text-sm text-gray-600">ARIA labels and keyboard navigation</p>
+                                </div>
+                                <svg class="h-5 w-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                </svg>
+                            </button>
+                            <div 
+                                class="overflow-hidden"
+                                style="max-height: 0; opacity: 0; transition: max-height 0.3s ease-out, opacity 0.3s ease-out;"
+                            >
+                                <div class="space-y-4 bg-gray-50 px-6 py-4 border-t border-gray-200">
+                                    <ul class="text-sm text-gray-600 space-y-2 list-disc list-inside">
+                                        <li>All interactive elements support keyboard navigation</li>
+                                        <li>ARIA labels describe component purpose to screen readers</li>
+                                        <li>Color contrast meets WCAG AA standards</li>
+                                        <li>Focus indicators are clearly visible</li>
+                                        <li>Animations respect prefers-reduced-motion</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Responsive Grid -->
+                <section class="animate-slideUp" style="animation-delay: 300ms;">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Responsive Design</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-200 hover:shadow-lg">
+                            <div class="text-3xl font-bold text-blue-600 mb-2">📱</div>
+                            <h3 class="font-semibold text-gray-900">Mobile</h3>
+                            <p class="text-sm text-gray-600 mt-2">Optimized for small screens</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-200 hover:shadow-lg">
+                            <div class="text-3xl font-bold text-green-600 mb-2">📊</div>
+                            <h3 class="font-semibold text-gray-900">Tablet</h3>
+                            <p class="text-sm text-gray-600 mt-2">Responsive grid layouts</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-200 hover:shadow-lg">
+                            <div class="text-3xl font-bold text-purple-600 mb-2">🖥️</div>
+                            <h3 class="font-semibold text-gray-900">Desktop</h3>
+                            <p class="text-sm text-gray-600 mt-2">Full-featured layouts</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-200 hover:shadow-lg">
+                            <div class="text-3xl font-bold text-red-600 mb-2">⚡</div>
+                            <h3 class="font-semibold text-gray-900">Performance</h3>
+                            <p class="text-sm text-gray-600 mt-2">60fps animations</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Toast Container -->
+            <div 
+                class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end gap-3 p-4"
+                data-controller="advanced-toast"
+            >
+                <div data-advanced-toast-target="container" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Template -->
+    <template id="toast-template">
+        <div 
+            class="flex max-w-md items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black/10 transition-all duration-300 ease-out animate-[slideInRight_0.3s_ease-out]"
+            data-toast-id=""
+        >
+            <div class="flex-shrink-0 pt-0.5">
+                <svg class="hidden h-5 w-5 text-green-500" data-toast-type="success" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path>
+                </svg>
+                <svg class="hidden h-5 w-5 text-red-500" data-toast-type="error" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"></path>
+                </svg>
+                <svg class="hidden h-5 w-5 text-blue-500" data-toast-type="info" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"></path>
+                </svg>
+            </div>
+            <div class="flex-1 pt-0.5">
+                <p class="text-sm font-medium text-gray-900" data-toast-title=""></p>
+            </div>
+            <button type="button" class="flex-shrink-0 text-gray-400 hover:text-gray-600" data-action="advanced-toast#dismiss">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <div class="absolute bottom-0 left-0 h-1 bg-gray-300" data-toast-progress="" style="width: 100%;"></div>
+        </div>
+    </template>
+
+    <!-- Stimulus JS Bundle (you need to import your controllers) -->
+    <script type="module">
+        import { Application } from "https://cdn.jsdelivr.net/npm/@hotwired/stimulus@3.2.2/+esm"
+        import AdvancedCardController from "./advanced_card_controller.js"
+        import AdvancedModalController from "./advanced_modal_controller.js"
+        import AdvancedFormController from "./advanced_form_controller.js"
+        import AdvancedToastController from "./advanced_toast_controller.js"
+        import AdvancedCollapseController from "./advanced_collapse_controller.js"
+
+        window.Stimulus = Application.start()
+        Stimulus.register("advanced-card", AdvancedCardController)
+        Stimulus.register("advanced-modal", AdvancedModalController)
+        Stimulus.register("advanced-form", AdvancedFormController)
+        Stimulus.register("advanced-toast", AdvancedToastController)
+        Stimulus.register("advanced-collapse", AdvancedCollapseController)
+    </script>
+</body>
+</html>

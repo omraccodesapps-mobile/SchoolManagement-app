@@ -1,0 +1,90 @@
+{# Advanced Modal Component #}
+{# Reusable modal dialog with animations, backdrop blur, and accessibility features #}
+
+<div 
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+    data-controller="advanced-modal"
+    data-advanced-modal-open-value="false"
+    data-action="click@window->advanced-modal#handleBackdropClick"
+>
+    {# Backdrop with blur effect #}
+    <div 
+        data-advanced-modal-target="backdrop"
+        class="absolute inset-0 bg-black/50 transition-opacity duration-300 backdrop-blur-sm"
+        aria-hidden="true"
+    ></div>
+
+    {# Modal container #}
+    <div 
+        data-advanced-modal-target="modal"
+        class="relative w-full max-w-md transform transition-all duration-300"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+    >
+        <div class="rounded-xl bg-white shadow-2xl">
+            {# Header #}
+            <div class="border-b border-gray-200 px-6 py-4 sm:flex sm:items-center sm:justify-between">
+                <div class="flex-1">
+                    <h2 
+                        id="modal-title"
+                        class="text-lg font-semibold text-gray-900"
+                    >
+                        {{ title | default('Modal Title') }}
+                    </h2>
+                    {% if subtitle %}
+                        <p class="mt-1 text-sm text-gray-500">{{ subtitle }}</p>
+                    {% endif %}
+                </div>
+
+                {# Close button #}
+                <button
+                    type="button"
+                    data-action="advanced-modal#close"
+                    class="ml-4 flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    aria-label="Close modal"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            {# Content #}
+            <div 
+                data-advanced-modal-target="content"
+                class="px-6 py-4 max-h-96 overflow-y-auto"
+            >
+                {% if content is defined %}
+                    {{ content | raw }}
+                {% endif %}
+            </div>
+
+            {# Footer with actions #}
+            {% if actions %}
+                <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+                    <div class="flex gap-3">
+                        {% for action in actions %}
+                            <button
+                                type="button"
+                                class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                                {% if action.variant == 'primary' %}
+                                    bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 active:scale-95
+                                {% elseif action.variant == 'danger' %}
+                                    bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 active:scale-95
+                                {% else %}
+                                    border border-gray-300 text-gray-700 hover:bg-gray-100 focus:ring-blue-500
+                                {% endif %}"
+                                data-action="advanced-modal#handleAction"
+                                data-action-id="{{ action.id | default(loop.index) }}"
+                                {% if action.dismiss %}data-dismiss="true"{% endif %}
+                            >
+                                {{ action.label }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

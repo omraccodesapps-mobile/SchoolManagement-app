@@ -1,14 +1,688 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Course{% endblock %}
+{% block title %}Create Course{% endblock %}
 
 {% block body %}
-<h1>Create New Course</h1>
+<div class="advanced-course-form-container">
+  <div class="course-form-wrapper" data-controller="advanced-form">
+    <!-- Left Section - Information -->
+    <div class="form-info-section">
+      <div class="info-content">
+        <h2>Create a New Course</h2>
+        <p>Design your course to inspire and educate students</p>
+        
+        <div class="info-steps">
+          <div class="info-step completed">
+            <span class="step-number">1</span>
+            <span class="step-text">Course Details</span>
+          </div>
+          <div class="info-step">
+            <span class="step-number">2</span>
+            <span class="step-text">Review & Publish</span>
+          </div>
+        </div>
 
-{{ form_start(form) }}
-  <div class="mb-3">{{ form_row(form.title) }}</div>
-  <div class="mb-3">{{ form_row(form.description) }}</div>
-  <button type="submit" class="btn btn-success">Create</button>
-  <a href="{{ path('app_course_index') }}" class="btn btn-outline-secondary">Cancel</a>
-{{ form_end(form) }}
+        <div class="info-benefits">
+          <h4>What You'll Get</h4>
+          <ul>
+            <li><span class="benefit-icon">✓</span> Manage students and grades</li>
+            <li><span class="benefit-icon">✓</span> Track progress with analytics</li>
+            <li><span class="benefit-icon">✓</span> Generate PDF reports</li>
+            <li><span class="benefit-icon">✓</span> Real-time collaboration</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section - Form -->
+    <div class="form-input-section">
+      <div class="form-header">
+        <h3>Course Information</h3>
+        <p>Fill in the details below</p>
+      </div>
+
+      {{ form_start(form, {'attr': {'class': 'advanced-course-form', 'data-advanced-form-target': 'form', 'novalidate': false}}) }}
+        
+        <!-- Title Field -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label for="{{ form.title.vars.id }}" class="advanced-form-label">Course Title</label>
+          <div class="advanced-input-wrapper">
+            {{ form_widget(form.title, {'attr': {'class': 'advanced-form-input', 'placeholder': 'e.g., Introduction to Web Development'}}) }}
+            <span class="input-icon">📚</span>
+            <div class="input-indicator"></div>
+          </div>
+          <div class="input-helper">Create a clear, descriptive title</div>
+          {% if form.title.vars.errors %}
+            {% for error in form.title.vars.errors %}
+              <span class="advanced-form-error">{{ error.message }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Description Field -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label for="{{ form.description.vars.id }}" class="advanced-form-label">Course Description</label>
+          <div class="advanced-textarea-wrapper">
+            {{ form_widget(form.description, {'attr': {'class': 'advanced-form-textarea', 'placeholder': 'Describe what students will learn in this course...', 'rows': 6}}) }}
+            <span class="textarea-icon">💬</span>
+            <div class="textarea-indicator"></div>
+          </div>
+          <div class="input-helper">{{ (form.description.vars.value ?? '')|length }}/500 characters</div>
+          {% if form.description.vars.errors %}
+            {% for error in form.description.vars.errors %}
+              <span class="advanced-form-error">{{ error.message }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="advanced-submit-btn" data-advanced-form-target="submitBtn">
+            <span class="btn-icon">✨</span>
+            <span class="btn-text">Create Course</span>
+          </button>
+          <a href="{{ path('app_course_index') }}" class="advanced-cancel-btn">
+            <span class="btn-text">Cancel</span>
+          </a>
+        </div>
+
+      {{ form_end(form) }}
+    </div>
+  </div>
+</div>
+
+<!-- Success Message Component -->
+<div id="successMessage" class="advanced-toast" style="display: none;">
+  <div class="toast-icon">✓</div>
+  <div class="toast-content">
+    <div class="toast-title">Success!</div>
+    <div class="toast-message" id="successText"></div>
+  </div>
+  <button class="toast-close">×</button>
+</div>
+
+<style>
+.advanced-course-form-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.course-form-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1000px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-info-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60px 40px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-info-section::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -100px;
+  right: -100px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.form-info-section::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  bottom: -50px;
+  left: -50px;
+  animation: float 6s ease-in-out 2s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(20px); }
+}
+
+.info-content {
+  position: relative;
+  z-index: 1;
+}
+
+.info-content h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  animation: slideInDown 0.8s ease-out;
+}
+
+.info-content > p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 40px;
+  animation: slideInDown 0.8s ease-out 0.1s both;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.info-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.info-step.completed {
+  border-left-color: #4ade80;
+  background: rgba(74, 222, 128, 0.2);
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.info-step.completed .step-number {
+  background: #4ade80;
+}
+
+.step-text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.info-benefits {
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.info-benefits h4 {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.info-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  opacity: 0.95;
+}
+
+.benefit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(74, 222, 128, 0.3);
+  border-radius: 50%;
+  font-size: 12px;
+  color: #4ade80;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-input-section {
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: slideInRight 0.8s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.form-header {
+  margin-bottom: 32px;
+}
+
+.form-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.form-header p {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.advanced-course-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.advanced-form-group {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.advanced-form-group:nth-child(1) { animation-delay: 0.1s; }
+.advanced-form-group:nth-child(2) { animation-delay: 0.2s; }
+
+.advanced-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.advanced-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.advanced-form-input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  font-family: inherit;
+}
+
+.advanced-form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.advanced-textarea-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+.advanced-form-textarea {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.advanced-form-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.input-icon, .textarea-icon {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  color: #999;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.textarea-icon {
+  top: 14px;
+}
+
+.input-indicator, .textarea-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  width: 0;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.advanced-form-input:focus ~ .input-indicator,
+.advanced-form-textarea:focus ~ .textarea-indicator {
+  width: 100%;
+}
+
+.input-helper {
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+}
+
+.advanced-form-error {
+  display: block;
+  font-size: 12px;
+  color: #e74c3c;
+  margin-top: 6px;
+  animation: shake 0.3s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.advanced-submit-btn, .advanced-cancel-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  text-decoration: none;
+  text-align: center;
+  justify-content: center;
+}
+
+.advanced-submit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.advanced-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.advanced-submit-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.advanced-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.advanced-submit-btn:active {
+  transform: translateY(0);
+}
+
+.advanced-cancel-btn {
+  background: white;
+  color: #2c3e50;
+  border: 2px solid #e0e0e0;
+  flex: 0 1 auto;
+}
+
+.advanced-cancel-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+.btn-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Toast Notification */
+.advanced-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 10000;
+  animation: slideInRight 0.4s ease-out;
+  max-width: 400px;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast-icon {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 13px;
+  opacity: 0.95;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .course-form-wrapper {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-info-section {
+    padding: 40px 20px;
+    min-height: auto;
+  }
+
+  .form-input-section {
+    padding: 40px 20px;
+  }
+
+  .info-content h2 {
+    font-size: 24px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .advanced-submit-btn {
+    flex: 1;
+  }
+
+  .advanced-cancel-btn {
+    flex: 1;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('created') === 'true') {
+    showSuccessMessage('Course created successfully! You can now manage your students and grades.');
+  }
+});
+
+function showSuccessMessage(message) {
+  const toast = document.getElementById('successMessage');
+  const messageEl = document.getElementById('successText');
+  
+  if (toast && messageEl) {
+    messageEl.textContent = message;
+    toast.style.display = 'flex';
+    toast.style.animation = 'slideInRight 0.4s ease-out';
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', function() {
+      dismissToast(toast);
+    });
+    
+    setTimeout(() => {
+      dismissToast(toast);
+    }, 5000);
+  }
+}
+
+function dismissToast(toast) {
+  toast.style.animation = 'slideOutRight 0.4s ease-out';
+  setTimeout(() => {
+    toast.style.display = 'none';
+  }, 400);
+}
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideOutRight {
+    to {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+  }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}

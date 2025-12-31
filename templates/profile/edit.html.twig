@@ -1,0 +1,372 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block body %}
+<div class="edit-profile-container">
+  <div class="edit-profile-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">Edit Profile</h1>
+        <p class="page-subtitle">Update your account information</p>
+      </div>
+      <a href="{{ path('app_profile') }}" class="btn-back">← Back to Profile</a>
+    </div>
+
+    <!-- Edit Form Card -->
+    <div class="edit-form-card">
+      <div class="card-header">
+        <h2 class="card-title">Account Information</h2>
+        <span class="card-icon">✏️</span>
+      </div>
+
+      <div class="card-content">
+        {{ form_start(form, {'attr': {'class': 'edit-profile-form', 'novalidate': 'novalidate'}}) }}
+
+          <!-- Email Field -->
+          <div class="form-group">
+            {{ form_label(form.email, 'Email Address', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="input-wrapper">
+              {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors ? ' is-invalid' : '')}}) }}
+              <span class="input-icon">✉</span>
+            </div>
+            {% if form.email.vars.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.email.vars.errors %}
+                  <span class="error-message">{{ error.message }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Name Field -->
+          <div class="form-group">
+            {{ form_label(form.name, 'Full Name', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="input-wrapper">
+              {{ form_widget(form.name, {'attr': {'class': 'form-control' ~ (form.name.vars.errors ? ' is-invalid' : '')}}) }}
+              <span class="input-icon">👤</span>
+            </div>
+            {% if form.name.vars.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.name.vars.errors %}
+                  <span class="error-message">{{ error.message }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <span class="btn-icon">💾</span>
+              Save Changes
+            </button>
+            <a href="{{ path('app_profile') }}" class="btn btn-secondary">
+              <span class="btn-icon">✕</span>
+              Cancel
+            </a>
+          </div>
+
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.edit-profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.edit-profile-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-content h1 {
+  margin: 0;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+}
+
+.page-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 5px;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-5px);
+}
+
+.edit-form-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.card-icon {
+  font-size: 28px;
+}
+
+.card-content {
+  padding: 40px;
+}
+
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px !important;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.form-control.is-invalid {
+  border-color: #e74c3c;
+  background: #fff5f5;
+}
+
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  right: 12px;
+  color: #999;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.invalid-feedback {
+  display: block;
+  padding: 8px 12px;
+  background: #fff5f5;
+  border-left: 3px solid #e74c3c;
+  border-radius: 5px;
+  animation: shake 0.3s ease-out;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 1px solid #e0e0e0;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-back {
+    width: 100%;
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .card-content {
+    padding: 25px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+</style>
+{% endblock %}

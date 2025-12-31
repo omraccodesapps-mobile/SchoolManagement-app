@@ -1,0 +1,166 @@
+{# Advanced Form Component #}
+{# Form with real-time validation, animated feedback, and accessible design #}
+
+<form 
+    class="space-y-6"
+    data-controller="advanced-form"
+    data-action="submit->advanced-form#handleSubmit"
+    {% if csrf_token %}novalidate{% endif %}
+>
+    {% if title %}
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+            {% if description %}
+                <p class="mt-1 text-sm text-gray-600">{{ description }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% for field in fields %}
+        <div class="space-y-2">
+            {# Label #}
+            <label 
+                for="field_{{ field.name }}"
+                class="block text-sm font-medium text-gray-900"
+            >
+                {{ field.label }}
+                {% if field.required %}
+                    <span class="text-red-500" aria-label="required">*</span>
+                {% endif %}
+            </label>
+
+            {# Field wrapper with validation state #}
+            <div class="relative">
+                {% if field.type == 'text' or field.type == 'email' or field.type == 'number' %}
+                    <input
+                        type="{{ field.type | default('text') }}"
+                        id="field_{{ field.name }}"
+                        name="{{ field.name }}"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-all duration-200 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500
+                        data-advanced-form-target='field'
+                        data-validation='{{ field.validation | default('') }}'
+                        {% if field.required %}required{% endif %}
+                        {% if field.placeholder %}placeholder="{{ field.placeholder }}"{% endif %}
+                        autocomplete="{{ field.autocomplete | default('off') }}"
+                        aria-label="{{ field.label }}"
+                        aria-describedby="error_{{ field.name }} hint_{{ field.name }}"
+                    />
+
+                {% elseif field.type == 'textarea' %}
+                    <textarea
+                        id="field_{{ field.name }}"
+                        name="{{ field.name }}"
+                        rows="{{ field.rows | default(4) }}"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-all duration-200 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 resize-none"
+                        data-advanced-form-target="field"
+                        data-validation="{{ field.validation | default('') }}"
+                        {% if field.required %}required{% endif %}
+                        {% if field.placeholder %}placeholder="{{ field.placeholder }}"{% endif %}
+                        aria-label="{{ field.label }}"
+                        aria-describedby="error_{{ field.name }} hint_{{ field.name }}"
+                    ></textarea>
+
+                {% elseif field.type == 'select' %}
+                    <select
+                        id="field_{{ field.name }}"
+                        name="{{ field.name }}"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 transition-all duration-200 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 appearance-none pr-10"
+                        data-advanced-form-target="field"
+                        data-validation="{{ field.validation | default('') }}"
+                        {% if field.required %}required{% endif %}
+                        aria-label="{{ field.label }}"
+                        aria-describedby="error_{{ field.name }}"
+                    >
+                        <option value="">{{ field.placeholder | default('Select an option') }}</option>
+                        {% for option in field.options %}
+                            <option value="{{ option.value }}">{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                        </svg>
+                    </div>
+
+                {% elseif field.type == 'checkbox' %}
+                    <div class="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="field_{{ field.name }}"
+                            name="{{ field.name }}"
+                            class="h-5 w-5 rounded border-gray-300 text-blue-600 transition-all duration-200 focus:ring-2 focus:ring-blue-200 focus:ring-offset-2"
+                            data-advanced-form-target="field"
+                            {% if field.required %}required{% endif %}
+                            aria-label="{{ field.label }}"
+                            aria-describedby="error_{{ field.name }}"
+                        />
+                        <label for="field_{{ field.name }}" class="text-sm text-gray-700">
+                            {{ field.checkboxLabel | default(field.label) }}
+                        </label>
+                    </div>
+                {% endif %}
+
+                {# Validation indicator #}
+                <div 
+                    data-advanced-form-target="validationIcon"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-200"
+                    aria-hidden="true"
+                >
+                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+
+            {# Helper text #}
+            {% if field.hint %}
+                <p id="hint_{{ field.name }}" class="text-xs text-gray-500">{{ field.hint }}</p>
+            {% endif %}
+
+            {# Error message with animation #}
+            <div 
+                id="error_{{ field.name }}"
+                data-advanced-form-target="errorMessage"
+                class="min-h-5 space-y-1 overflow-hidden transition-all duration-200"
+                role="alert"
+            ></div>
+        </div>
+    {% endfor %}
+
+    {# Form-level error #}
+    <div 
+        data-advanced-form-target="formError"
+        class="hidden rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        role="alert"
+    ></div>
+
+    {# Submit button with loading state #}
+    <div class="flex gap-3 pt-4">
+        <button
+            type="submit"
+            class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
+            data-advanced-form-target="submitButton"
+        >
+            <span data-advanced-form-target="submitText">{{ submit_label | default('Submit') }}</span>
+            <svg 
+                data-advanced-form-target="loadingSpinner"
+                class="hidden h-4 w-4 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </button>
+
+        {% if show_reset %}
+            <button
+                type="reset"
+                class="rounded-lg border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
+            >
+                Reset
+            </button>
+        {% endif %}
+    </div>
+</form>

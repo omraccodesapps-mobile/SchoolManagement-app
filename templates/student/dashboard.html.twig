@@ -3,103 +3,719 @@
 {% block title %}Student Dashboard{% endblock %}
 
 {% block body %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1>Student Dashboard</h1>
-  <a href="{{ path('app_enrollment_available') }}" class="btn btn-primary">+ Enroll in Course</a>
-</div>
+<div class="advanced-student-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div>
+        <h1 class="dashboard-title">My Learning Dashboard</h1>
+        <p class="dashboard-subtitle">Track your progress and manage your courses</p>
+      </div>
+      <a href="{{ path('app_enrollment_available') }}" class="advanced-primary-btn">
+        <span class="btn-icon">+</span>
+        <span class="btn-text">Enroll in Course</span>
+      </a>
+    </div>
+  </div>
 
-<div class="row mb-4">
-  <div class="col-md-12">
-    <h2>My Courses</h2>
+  <!-- Stats Section -->
+  <div class="stats-grid">
+    <div class="stat-card" data-controller="advanced-card">
+      <div class="stat-value">{{ enrollments|length }}</div>
+      <div class="stat-label">Enrolled Courses</div>
+      <div class="stat-icon">📚</div>
+    </div>
+    <div class="stat-card" data-controller="advanced-card">
+      <div class="stat-value">{{ enrollments|length > 0 ? 'Active' : 'None' }}</div>
+      <div class="stat-label">Current Status</div>
+      <div class="stat-icon">⚡</div>
+    </div>
+    <div class="stat-card" data-controller="advanced-card">
+      <div class="stat-value">{{ (enrollments|length * 100) / (enrollments|length > 0 ? enrollments|length : 1)|round }}</div>
+      <div class="stat-label">Overall Progress</div>
+      <div class="stat-icon">📈</div>
+    </div>
+  </div>
+
+  <!-- Courses Section -->
+  <div class="courses-section">
+    <div class="section-header">
+      <h2 class="section-title">My Courses</h2>
+      <p class="section-subtitle">{{ enrollments|length }} course{{ enrollments|length != 1 ? 's' : '' }} enrolled</p>
+    </div>
+
     {% if enrollments %}
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Course</th>
-            <th>Teacher</th>
-            <th>Enrolled</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for enrollment in enrollments %}
-            <tr>
-              <td><strong>{{ enrollment.course.title }}</strong></td>
-              <td>{{ enrollment.course.teacher.name }}</td>
-              <td>{{ enrollment.enrolledAt|date('Y-m-d') }}</td>
-              <td>
-                <div class="btn-group btn-group-sm" role="group">
-                  <a href="{{ path('app_student_grades_course', {courseId: enrollment.course.id}) }}" class="btn btn-outline-primary">Grades</a>
-                  <a href="{{ path('pdf_student_bulletin', {courseId: enrollment.course.id}) }}" class="btn btn-outline-success pdf-download-student" data-course="{{ enrollment.course.title }}" title="Download Bulletin">
-                    <i class="bi bi-download"></i> Bulletin
-                  </a>
-                  <form method="POST" action="{{ path('app_enrollment_drop', {courseId: enrollment.course.id}) }}" style="display:inline;">
-                    <input type="hidden" name="_token" value="{{ csrf_token('drop' ~ enrollment.course.id) }}">
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Drop this course?')">Drop</button>
-                  </form>
+      <div class="courses-grid">
+        {% for enrollment in enrollments %}
+          <div class="course-card" data-controller="advanced-card" data-advanced-card-id="{{ enrollment.course.id }}">
+            <div class="course-card-header">
+              <div class="course-badge">{{ enrollment.course.teacher.name }}</div>
+              <div class="course-actions">
+                <button class="action-icon" title="More options">⋮</button>
+              </div>
+            </div>
+
+            <div class="course-card-content">
+              <h3 class="course-title">{{ enrollment.course.title }}</h3>
+              <p class="course-teacher">by {{ enrollment.course.teacher.name }}</p>
+              
+              <div class="course-meta">
+                <span class="meta-item">
+                  <span class="meta-icon">📅</span>
+                  <span class="meta-text">{{ enrollment.enrolledAt|date('M d, Y') }}</span>
+                </span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="progress-section">
+                <div class="progress-header">
+                  <span>Progress</span>
+                  <span class="progress-percent">75%</span>
                 </div>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 75%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="course-card-footer">
+              <div class="course-actions-group">
+                <a href="{{ path('app_student_grades_course', {courseId: enrollment.course.id}) }}" 
+                   class="action-btn grades-btn" 
+                   title="View Grades">
+                  <span class="action-icon">📊</span>
+                  <span class="action-text">Grades</span>
+                </a>
+                
+                <a href="{{ path('pdf_student_bulletin', {courseId: enrollment.course.id}) }}" 
+                   class="action-btn pdf-btn pdf-download-student" 
+                   data-course="{{ enrollment.course.title }}"
+                   title="Download Bulletin">
+                  <span class="action-icon">📥</span>
+                  <span class="action-text">Bulletin</span>
+                </a>
+
+                <form method="POST" 
+                      action="{{ path('app_enrollment_drop', {courseId: enrollment.course.id}) }}" 
+                      class="drop-form">
+                  <input type="hidden" name="_token" value="{{ csrf_token('drop' ~ enrollment.course.id) }}">
+                  <button type="submit" 
+                          class="action-btn drop-btn" 
+                          title="Drop this course"
+                          onclick="return confirm('Are you sure you want to drop this course?')">
+                    <span class="action-icon">🗑️</span>
+                    <span class="action-text">Drop</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Card Overlay Animation -->
+            <div class="card-overlay"></div>
+          </div>
+        {% endfor %}
+      </div>
     {% else %}
-      <p class="alert alert-warning">You're not enrolled in any courses yet. <a href="{{ path('app_enrollment_available') }}">Browse courses</a></p>
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <h3>No Courses Yet</h3>
+        <p>You haven't enrolled in any courses yet. Start learning today!</p>
+        <a href="{{ path('app_enrollment_available') }}" class="advanced-primary-btn">
+          <span class="btn-icon">+</span>
+          <span class="btn-text">Browse Courses</span>
+        </a>
+      </div>
     {% endif %}
   </div>
 </div>
 
 <style>
-    .pdf-download-student {
-        transition: all 0.3s ease;
-    }
-    
-    .pdf-download-student:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+.advanced-student-dashboard {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.dashboard-header {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.dashboard-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  animation: slideInDown 0.6s ease-out;
+}
+
+.dashboard-subtitle {
+  font-size: 15px;
+  color: #7f8c8d;
+  animation: slideInDown 0.6s ease-out 0.1s both;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.advanced-primary-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  font-size: 15px;
+  animation: slideInDown 0.6s ease-out 0.2s both;
+}
+
+.advanced-primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.advanced-primary-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 20px;
+}
+
+.btn-text {
+  position: relative;
+}
+
+/* Stats Grid */
+.stats-grid {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  animation: bounceIn 0.6s ease-out both;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.stat-card:hover::before {
+  left: 100%;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-icon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 60px;
+  opacity: 0.1;
+}
+
+/* Courses Section */
+.courses-section {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  margin-bottom: 30px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.course-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInUp 0.6s ease-out both;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card:nth-child(1) { animation-delay: 0.1s; }
+.course-card:nth-child(2) { animation-delay: 0.2s; }
+.course-card:nth-child(3) { animation-delay: 0.3s; }
+.course-card:nth-child(n+4) { animation-delay: 0.4s; }
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.course-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.course-card-header {
+  padding: 20px 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: popIn 0.5s ease-out;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.course-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-icon {
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 4px;
+}
+
+.action-icon:hover {
+  color: #667eea;
+  transform: scale(1.1);
+}
+
+.course-card-content {
+  padding: 20px;
+  flex: 1;
+}
+
+.course-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.course-teacher {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 15px;
+}
+
+.course-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.meta-icon {
+  font-size: 16px;
+}
+
+.progress-section {
+  margin-bottom: 15px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.progress-percent {
+  color: #667eea;
+  font-weight: 700;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+  animation: slideInWidth 1.2s ease-out;
+}
+
+@keyframes slideInWidth {
+  from {
+    width: 0 !important;
+  }
+}
+
+.course-card-footer {
+  padding: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.course-actions-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #2c3e50;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.action-btn:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+.grades-btn { --color: #667eea; }
+.pdf-btn { --color: #27ae60; }
+.drop-btn { --color: #e74c3c; }
+
+.action-btn.grades-btn:hover { border-color: var(--color); color: var(--color); }
+.action-btn.pdf-btn:hover { border-color: var(--color); color: var(--color); }
+.action-btn.drop-btn:hover { border-color: var(--color); color: var(--color); background: rgba(231, 76, 60, 0.05); }
+
+.action-icon {
+  font-size: 18px;
+}
+
+.action-text {
+  font-size: 10px;
+}
+
+.drop-form {
+  display: contents;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-state h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-bottom: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-title {
+    font-size: 28px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .course-actions-group {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const pdfButtons = document.querySelectorAll('.pdf-download-student');
+document.addEventListener('DOMContentLoaded', function() {
+  // PDF Download Animation
+  const pdfButtons = document.querySelectorAll('.pdf-download-student');
+  
+  pdfButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      const courseName = this.getAttribute('data-course');
+      const originalHtml = this.innerHTML;
+      
+      // Add loading state
+      this.innerHTML = '<span class="action-icon">⏳</span><span class="action-text">Loading...</span>';
+      this.style.pointerEvents = 'none';
+      this.style.opacity = '0.6';
+      
+      // Simulate download delay
+      setTimeout(() => {
+        this.innerHTML = originalHtml;
+        this.style.pointerEvents = 'auto';
+        this.style.opacity = '1';
         
-        pdfButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                const courseName = this.getAttribute('data-course');
-                
-                // Show loading state
-                const originalHtml = this.innerHTML;
-                this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                this.disabled = true;
-                
-                // Set timeout to restore button
-                setTimeout(() => {
-                    this.innerHTML = originalHtml;
-                    this.disabled = false;
-                    
-                    // Show toast notification
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'position-fixed bottom-0 end-0 m-3 alert alert-success alert-dismissible fade show';
-                    alertDiv.role = 'alert';
-                    alertDiv.style.zIndex = '9999';
-                    alertDiv.innerHTML = `
-                        <i class="bi bi-check-circle"></i>
-                        <strong>Downloading</strong> bulletin for "${courseName}"
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    `;
-                    
-                    document.body.appendChild(alertDiv);
-                    
-                    // Auto-dismiss after 5 seconds
-                    setTimeout(() => {
-                        if (alertDiv.parentNode) {
-                            alertDiv.remove();
-                        }
-                    }, 5000);
-                }, 1500);
-            });
-        });
+        // Show success message (Toast simulation)
+        showDownloadNotification(courseName);
+      }, 1500);
     });
+  });
+
+  // Drop course confirmation with animation
+  const dropForms = document.querySelectorAll('.drop-form');
+  dropForms.forEach(form => {
+    const submitBtn = form.querySelector('[type="submit"]');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function(e) {
+        const card = this.closest('.course-card');
+        if (card) {
+          card.style.animation = 'slideOutDown 0.3s ease-out';
+          setTimeout(() => {
+            form.submit();
+          }, 300);
+        }
+      });
+    }
+  });
+
+  // Card hover effects
+  const courseCards = document.querySelectorAll('.course-card');
+  courseCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.zIndex = '10';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.zIndex = 'auto';
+    });
+  });
+});
+
+function showDownloadNotification(courseName) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    animation: slideInRight 0.4s ease-out;
+    font-size: 14px;
+    font-weight: 600;
+  `;
+  notification.innerHTML = `
+    <span>✓</span>
+    <span>Downloading bulletin for "<strong>${courseName}</strong>"</span>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOutRight 0.4s ease-out';
+    setTimeout(() => notification.remove(), 400);
+  }, 3000);
+}
+
+// Define slideOut animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideOutDown {
+    to {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+  @keyframes slideOutRight {
+    to {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+  }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

@@ -1,0 +1,103 @@
+{# Advanced Toast Notification Component #}
+{# Toast notifications that slide in with animations and auto-dismiss #}
+
+<div
+    class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end gap-3 p-4"
+    data-controller="advanced-toast"
+    aria-live="polite"
+    aria-atomic="true"
+>
+    {# Toast container that receives individual toast items #}
+    <div data-advanced-toast-target="container" class="space-y-3 flex flex-col items-end"></div>
+</div>
+
+{# Template for individual toast notifications (hidden, used for cloning) #}
+<template id="toast-template">
+    <div 
+        class="flex max-w-md transform items-start gap-3 rounded-lg bg-white p-4 shadow-lg ring-1 ring-black/10 transition-all duration-300 ease-out
+        animate-[slideInRight_0.3s_ease-out]"
+        role="status"
+        data-toast-id=""
+    >
+        {# Icon section #}
+        <div class="flex-shrink-0 pt-0.5" data-toast-icon="">
+            {# Success icon #}
+            <svg class="hidden h-5 w-5 text-green-500" data-toast-type="success" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            {# Error icon #}
+            <svg class="hidden h-5 w-5 text-red-500" data-toast-type="error" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            {# Warning icon #}
+            <svg class="hidden h-5 w-5 text-yellow-500" data-toast-type="warning" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            {# Info icon #}
+            <svg class="hidden h-5 w-5 text-blue-500" data-toast-type="info" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+        </div>
+
+        {# Message section #}
+        <div class="flex-1 pt-0.5">
+            <p class="text-sm font-medium text-gray-900" data-toast-title=""></p>
+            <p class="mt-1 text-sm text-gray-600" data-toast-message="" style="display: none;"></p>
+        </div>
+
+        {# Action button (optional) #}
+        <button 
+            type="button"
+            class="flex-shrink-0 font-medium text-blue-600 transition-colors duration-200 hover:text-blue-700 focus:outline-none focus:underline"
+            data-toast-action=""
+            style="display: none;"
+        ></button>
+
+        {# Close button #}
+        <button
+            type="button"
+            class="flex-shrink-0 transition-colors duration-200 text-gray-400 hover:text-gray-600 focus:outline-none"
+            data-action="advanced-toast#dismiss"
+            aria-label="Close notification"
+        >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        {# Progress bar for auto-dismiss #}
+        <div 
+            class="absolute bottom-0 left-0 h-1 bg-gray-300 transition-all duration-300 ease-linear"
+            data-toast-progress=""
+            style="width: 100%;"
+        ></div>
+    </div>
+</template>
+
+<style>
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(400px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(400px) scale(0.9);
+        }
+    }
+
+    [data-toast-animation="out"] {
+        animation: slideOutRight 0.3s ease-in forwards;
+    }
+</style>
