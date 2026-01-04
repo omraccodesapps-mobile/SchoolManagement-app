@@ -15,7 +15,7 @@ use Symfony\Component\Dotenv\Dotenv;
 // ============================================================================
 // Load Composer Autoloader
 // ============================================================================
-require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
 // ============================================================================
 // Load Environment Variables
@@ -25,10 +25,10 @@ if (!isset($_SERVER['APP_ENV'])) {
 }
 
 // Load .env files (use .env.test if it exists, otherwise .env)
-if (file_exists(dirname(__DIR__).'/.env.test')) {
-    (new Dotenv())->bootEnv(dirname(__DIR__).'/.env.test');
+if (file_exists(dirname(__DIR__) . '/.env.test')) {
+    (new Dotenv())->bootEnv(dirname(__DIR__) . '/.env.test');
 } elseif (method_exists(Dotenv::class, 'bootEnv')) {
-    (new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
+    (new Dotenv())->bootEnv(dirname(__DIR__) . '/.env');
 }
 
 // ============================================================================

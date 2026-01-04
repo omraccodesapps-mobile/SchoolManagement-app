@@ -30,7 +30,7 @@ class RegistrationType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new NotBlank(),
-                    new Length(['min' => 6]),
+                    new Length(min: 6),
                 ],
             ])
             ->add('roles', ChoiceType::class, [
