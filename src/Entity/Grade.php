@@ -24,7 +24,7 @@ class Grade
     #[ORM\ManyToOne(targetEntity: User::class)]
     private ?User $student = null;
 
-    #[ORM\ManyToOne(targetEntity: Course::class)]
+    #[ORM\ManyToOne(targetEntity: Course::class, inversedBy: 'grades')]
     private ?Course $course = null;
 
     #[ORM\Column(type: 'datetime')]

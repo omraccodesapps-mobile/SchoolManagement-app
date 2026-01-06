@@ -16,8 +16,12 @@
             <span class="step-number">1</span>
             <span class="step-text">Course Details</span>
           </div>
-          <div class="info-step">
+          <div class="info-step active">
             <span class="step-number">2</span>
+            <span class="step-text">Video (Optional)</span>
+          </div>
+          <div class="info-step">
+            <span class="step-number">3</span>
             <span class="step-text">Review & Publish</span>
           </div>
         </div>
@@ -25,6 +29,7 @@
         <div class="info-benefits">
           <h4>What You'll Get</h4>
           <ul>
+            <li><span class="benefit-icon">✓</span> Upload introduction videos</li>
             <li><span class="benefit-icon">✓</span> Manage students and grades</li>
             <li><span class="benefit-icon">✓</span> Track progress with analytics</li>
             <li><span class="benefit-icon">✓</span> Generate PDF reports</li>
@@ -70,6 +75,52 @@
           <div class="input-helper">{{ (form.description.vars.value ?? '')|length }}/500 characters</div>
           {% if form.description.vars.errors %}
             {% for error in form.description.vars.errors %}
+              <span class="advanced-form-error">{{ error.message }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Video Upload Field -->
+        <div class="advanced-form-group" data-advanced-form-target="field">
+          <label for="{{ form.video.vars.id }}" class="advanced-form-label">Course Introduction Video (Optional)</label>
+          <div class="advanced-file-upload-wrapper">
+            <div class="file-upload-zone" id="videoUploadZone" data-controller="file-upload">
+              <input type="file" id="{{ form.video.vars.id }}" name="{{ form.video.vars.full_name }}" 
+                     class="file-input" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo"
+                     data-action="change->file-upload#onFileSelect">
+              <div class="upload-content">
+                <span class="upload-icon">🎬</span>
+                <h4>Drop video here or click to browse</h4>
+                <p>Supported: MP4, WebM, OGG, MOV, AVI (Max 2GB)</p>
+              </div>
+            </div>
+            
+            <!-- File Preview -->
+            <div id="filePreview" class="file-preview" style="display: none;">
+              <div class="preview-item">
+                <span class="preview-icon">🎥</span>
+                <div class="preview-info">
+                  <div class="preview-name" id="previewName"></div>
+                  <div class="preview-size" id="previewSize"></div>
+                </div>
+                <button type="button" class="preview-remove" id="removeFile">&times;</button>
+              </div>
+              <div class="preview-progress" id="uploadProgress" style="display: none;">
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                  <span id="progressPercent">0</span>% uploading...
+                </div>
+              </div>
+            </div>
+
+            <div class="input-helper">
+              Upload a video to be used as your course introduction. Videos will be processed automatically for streaming.
+            </div>
+          </div>
+          {% if form.video.vars.errors %}
+            {% for error in form.video.vars.errors %}
               <span class="advanced-form-error">{{ error.message }}</span>
             {% endfor %}
           {% endif %}
@@ -229,6 +280,11 @@
   background: rgba(74, 222, 128, 0.2);
 }
 
+.info-step.active {
+  border-left-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.2);
+}
+
 .step-number {
   display: flex;
   align-items: center;
@@ -243,6 +299,10 @@
 
 .info-step.completed .step-number {
   background: #4ade80;
+}
+
+.info-step.active .step-number {
+  background: #60a5fa;
 }
 
 .step-text {
@@ -605,6 +665,148 @@
   opacity: 1;
 }
 
+/* File Upload Styles */
+.advanced-file-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.file-upload-zone {
+  border: 2px dashed #007bff;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+}
+
+.file-upload-zone:hover {
+  border-color: #0056b3;
+  background-color: #e7f1ff;
+}
+
+.file-upload-zone.drag-over {
+  border-color: #0056b3;
+  background-color: #cce5ff;
+  transform: scale(1.02);
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-icon {
+  font-size: 48px;
+}
+
+.upload-content h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.upload-content p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.file-preview {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 6px;
+}
+
+.preview-icon {
+  font-size: 32px;
+}
+
+.preview-info {
+  flex: 1;
+  text-align: left;
+}
+
+.preview-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.preview-size {
+  font-size: 12px;
+  color: #999;
+}
+
+.preview-remove {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.preview-remove:hover {
+  background-color: #fee;
+  color: #c82333;
+}
+
+.preview-progress {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  width: 0;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .course-form-wrapper {
@@ -635,6 +837,10 @@
 
   .advanced-cancel-btn {
     flex: 1;
+  }
+
+  .file-upload-zone {
+    padding: 30px 20px;
   }
 }
 </style>
@@ -684,5 +890,86 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// File Upload Handler
+const videoUploadZone = document.getElementById('videoUploadZone');
+const videoInput = document.getElementById('course_video');
+const filePreview = document.getElementById('filePreview');
+const uploadProgress = document.getElementById('uploadProgress');
+const previewName = document.getElementById('previewName');
+const previewSize = document.getElementById('previewSize');
+const removeFile = document.getElementById('removeFile');
+const progressFill = document.getElementById('progressFill');
+const progressPercent = document.getElementById('progressPercent');
+
+if (videoUploadZone && videoInput) {
+  // Click to upload
+  videoUploadZone.addEventListener('click', () => videoInput.click());
+
+  // Drag and drop
+  videoUploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    videoUploadZone.classList.add('drag-over');
+  });
+
+  videoUploadZone.addEventListener('dragleave', () => {
+    videoUploadZone.classList.remove('drag-over');
+  });
+
+  videoUploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    videoUploadZone.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      handleFileSelect(files[0]);
+    }
+  });
+
+  // File input change
+  videoInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+      handleFileSelect(e.target.files[0]);
+    }
+  });
+
+  // Remove file
+  if (removeFile) {
+    removeFile.addEventListener('click', () => {
+      videoInput.value = '';
+      filePreview.style.display = 'none';
+      uploadProgress.style.display = 'none';
+    });
+  }
+
+  function handleFileSelect(file) {
+    // Validate file size (2GB max)
+    const maxSize = 2 * 1024 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('File size exceeds 2GB limit');
+      videoInput.value = '';
+      return;
+    }
+
+    // Display preview
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    previewName.textContent = file.name;
+    previewSize.textContent = sizeMB + ' MB';
+    filePreview.style.display = 'block';
+    uploadProgress.style.display = 'block';
+
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 30;
+      if (progress > 90) progress = 90;
+      progressFill.style.width = progress + '%';
+      progressPercent.textContent = Math.floor(progress);
+
+      if (progress >= 90) {
+        clearInterval(interval);
+      }
+    }, 300);
+  }
+}
 </script>
 {% endblock %}

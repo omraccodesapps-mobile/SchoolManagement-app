@@ -30,10 +30,14 @@ class Course
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Grade::class, cascade: ['persist', 'remove'])]
     private Collection $grades;
 
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Video::class, cascade: ['persist', 'remove'])]
+    private Collection $videos;
+
     public function __construct()
     {
         $this->enrollments = new ArrayCollection();
         $this->grades = new ArrayCollection();
+        $this->videos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -104,6 +108,33 @@ class Course
         if ($this->grades->removeElement($grade)) {
             if ($grade->getCourse() === $this) {
                 $grade->setCourse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /** @return Collection|Video[] */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
+    }
+
+    public function addVideo(Video $video): self
+    {
+        if (!$this->videos->contains($video)) {
+            $this->videos->add($video);
+            $video->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVideo(Video $video): self
+    {
+        if ($this->videos->removeElement($video)) {
+            if ($video->getCourse() === $this) {
+                $video->setCourse(null);
             }
         }
 

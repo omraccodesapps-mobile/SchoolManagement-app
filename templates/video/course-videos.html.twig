@@ -1,0 +1,345 @@
+{# Course Videos Page #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Course Videos - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Header Section -->
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1 id="courseName">Loading Course...</h1>
+                <p class="text-muted" id="courseDescription"></p>
+            </div>
+            <div>
+                <a href="/courses" class="btn btn-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Courses
+                </a>
+                <button class="btn btn-primary" id="uploadVideoBtn" style="display: none;">
+                    <i class="bi bi-cloud-upload"></i> Upload Video
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4" id="statsSection" style="display: none;">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Videos</h5>
+                    <h3 id="totalVideosCount">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Ready</h5>
+                    <h3 class="text-success" id="readyVideosCount">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Processing</h5>
+                    <h3 class="text-warning" id="processingVideosCount">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Duration</h5>
+                    <h3 id="totalDuration">0h</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="mb-4">
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="form-control" 
+                placeholder="Search videos..."
+            />
+            <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+
+    <!-- Videos Grid -->
+    <div class="row" id="videosContainer">
+        <div class="col-12">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Videos Message -->
+    <div class="alert alert-info" id="noVideosMessage" style="display: none;">
+        <i class="bi bi-info-circle"></i>
+        No videos found for this course.
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const courseId = new URLSearchParams(window.location.search).get('course_id') || 
+                     window.location.pathname.split('/').pop();
+    
+    let allVideos = [];
+    let isTeacher = false;
+
+    // Check if user is teacher
+    async function checkTeacherStatus() {
+        try {
+            const response = await fetch(`/api/courses/${courseId}/videos/all`);
+            isTeacher = response.ok;
+            if (isTeacher) {
+                document.getElementById('uploadVideoBtn').style.display = 'inline-block';
+                document.getElementById('uploadVideoBtn').href = `/videos/upload?course_id=${courseId}`;
+            }
+        } catch (e) {
+            isTeacher = false;
+        }
+    }
+
+    // Load course summary
+    async function loadCourseSummary() {
+        try {
+            const response = await fetch(`/api/courses/${courseId}/summary`);
+            const data = await response.json();
+
+            if (data.success) {
+                const course = data.data;
+                document.getElementById('courseName').textContent = course.courseName;
+                document.getElementById('courseDescription').textContent = course.courseDescription;
+
+                // Update statistics
+                const stats = course.statistics;
+                document.getElementById('totalVideosCount').textContent = stats.totalVideos;
+                document.getElementById('readyVideosCount').textContent = stats.readyVideos;
+                document.getElementById('processingVideosCount').textContent = stats.processingVideos;
+                document.getElementById('totalDuration').textContent = formatDuration(stats.totalDuration);
+
+                if (stats.totalVideos > 0) {
+                    document.getElementById('statsSection').style.display = 'grid';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading course summary:', error);
+        }
+    }
+
+    // Load videos
+    async function loadVideos(ready = true) {
+        try {
+            const endpoint = isTeacher ? 'all' : '';
+            const url = `/api/courses/${courseId}/videos${endpoint ? '/' + endpoint : ''}`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.success) {
+                allVideos = data.data.videos || [];
+                displayVideos(allVideos);
+            }
+        } catch (error) {
+            console.error('Error loading videos:', error);
+            displayError('Failed to load videos');
+        }
+    }
+
+    // Display videos
+    function displayVideos(videos) {
+        const container = document.getElementById('videosContainer');
+        
+        if (videos.length === 0) {
+            container.innerHTML = '';
+            document.getElementById('noVideosMessage').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('noVideosMessage').style.display = 'none';
+        container.innerHTML = videos.map(video => `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 video-card">
+                    <!-- Thumbnail -->
+                    <div class="position-relative" style="padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000;">
+                        <img 
+                            src="${video.thumbnailUrl || '/images/video-placeholder.png'}" 
+                            alt="${video.title}"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
+                            class="card-img-top"
+                        />
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-play-circle" style="font-size: 3rem; color: white; opacity: 0.8;"></i>
+                        </div>
+                        <span class="badge bg-dark position-absolute bottom-2 end-2">
+                            ${formatTime(video.duration)}
+                        </span>
+                        ${video.status !== 'READY' ? `
+                            <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.5);">
+                                <span class="badge bg-warning">${video.status}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title" title="${video.title}">
+                            ${truncate(video.title, 50)}
+                        </h5>
+                        <p class="card-text text-muted small" title="${video.description}">
+                            ${truncate(video.description || 'No description', 80)}
+                        </p>
+                        <div class="mb-2">
+                            <small class="text-muted">By: ${video.uploadedBy}</small>
+                        </div>
+                        ${video.status === 'READY' ? `
+                            <div class="mb-2">
+                                <small class="text-muted">Available Qualities:</small><br>
+                                ${video.qualities.map(q => `
+                                    <small class="badge bg-info">${q.resolution}</small>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="card-footer bg-white">
+                        ${video.status === 'READY' ? `
+                            <a 
+                                href="/videos/player?id=${video.id}" 
+                                class="btn btn-primary w-100 btn-sm"
+                            >
+                                <i class="bi bi-play-fill"></i> Watch
+                            </a>
+                        ` : `
+                            <button class="btn btn-secondary w-100 btn-sm" disabled>
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Processing...
+                            </button>
+                        `}
+                        ${isTeacher ? `
+                            <button class="btn btn-danger btn-sm w-100 mt-2 delete-video" data-video-id="${video.id}">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Add delete event listeners
+        document.querySelectorAll('.delete-video').forEach(btn => {
+            btn.addEventListener('click', () => deleteVideo(btn.dataset.videoId));
+        });
+    }
+
+    // Delete video
+    async function deleteVideo(videoId) {
+        if (!confirm('Are you sure you want to delete this video?')) return;
+
+        try {
+            const response = await fetch(`/api/videos/${videoId}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (data.success) {
+                loadVideos();
+                loadCourseSummary();
+            } else {
+                alert('Error deleting video: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error deleting video:', error);
+            alert('Failed to delete video');
+        }
+    }
+
+    // Display error
+    function displayError(message) {
+        document.getElementById('videosContainer').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                    ${message}
+                </div>
+            </div>
+        `;
+    }
+
+    // Utility functions
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    function formatDuration(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        if (h > 0) return `${h}h ${m}m`;
+        return `${m}m`;
+    }
+
+    function truncate(str, len) {
+        return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+
+    // Search functionality
+    document.getElementById('searchBtn').addEventListener('click', () => {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) {
+            displayVideos(allVideos);
+            return;
+        }
+
+        const filtered = allVideos.filter(v => 
+            v.title.toLowerCase().includes(query.toLowerCase()) ||
+            v.description.toLowerCase().includes(query.toLowerCase())
+        );
+
+        displayVideos(filtered);
+    });
+
+    // Initialize
+    await checkTeacherStatus();
+    await loadCourseSummary();
+    await loadVideos();
+
+    // Refresh every 30 seconds
+    setInterval(() => {
+        loadCourseSummary();
+        loadVideos();
+    }, 30000);
+});
+</script>
+
+<style>
+.video-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+}
+</style>
+{% endblock %}

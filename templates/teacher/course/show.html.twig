@@ -15,6 +15,82 @@
   </div>
 </div>
 
+<!-- Course Videos Section -->
+{% if course.videos|length > 0 %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title mb-3">
+      <i class="bi bi-film"></i> Course Videos ({{ course.videos|length }})
+    </h5>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Duration</th>
+            <th>Uploaded</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for video in course.videos %}
+          <tr>
+            <td>
+              <strong>{{ video.title }}</strong>
+              {% if video.description %}
+                <br><small class="text-muted">{{ video.description|truncate(50) }}</small>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-{% if video.status == 'PROCESSING' %}warning{% elseif video.status == 'READY' %}success{% elseif video.status == 'ERROR' %}danger{% else %}secondary{% endif %}">
+                {{ video.status }}
+              </span>
+            </td>
+            <td>
+              {% if video.duration %}
+                {{ (video.duration / 60)|number_format(0) }}m
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <small>{{ video.createdAt|date('M d, Y') }}</small>
+            </td>
+            <td>
+              {% if video.status == 'READY' %}
+                <a href="{{ path('app_video_detail', {id: video.id}) }}" class="btn btn-sm btn-primary" title="Watch">
+                  <i class="bi bi-play-circle"></i> Watch
+                </a>
+              {% elseif video.status == 'PROCESSING' %}
+                <span class="badge bg-warning">Processing...</span>
+              {% elseif video.status == 'ERROR' %}
+                <span class="badge bg-danger">Failed</span>
+              {% endif %}
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteVideo({{ video.id }})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="card mb-3">
+  <div class="card-body">
+    <p class="text-muted mb-3">
+      <i class="bi bi-info-circle"></i> No videos uploaded yet.
+    </p>
+    <a href="{{ path('api_videos_upload') }}" class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-circle"></i> Upload Video
+    </a>
+  </div>
+</div>
+{% endif %}
+
 <!-- PDF Actions -->
 <div class="card mb-3">
   <div class="card-body">

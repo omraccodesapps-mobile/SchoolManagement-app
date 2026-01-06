@@ -7,6 +7,16 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    minio_endpoint: '%env(MINIO_ENDPOINT)%'
+    minio_root_user: '%env(MINIO_ROOT_USER)%'
+    minio_root_password: '%env(MINIO_ROOT_PASSWORD)%'
+    minio_region: '%env(MINIO_REGION)%'
+    minio_bucket_videos: '%env(MINIO_BUCKET_VIDEOS)%'
+    minio_bucket_thumbnails: '%env(MINIO_BUCKET_THUMBNAILS)%'
+    ffmpeg_path: '%env(FFMPEG_PATH)%'
+    ffprobe_path: '%env(FFPROBE_PATH)%'
+    video_temp_dir: '%env(VIDEO_TEMP_DIR)%'
+    video_transcoding_resolutions: '%env(csv:VIDEO_TRANSCODING_RESOLUTIONS)%'
 
 services:
     # default configuration for services in *this* file
@@ -19,5 +29,23 @@ services:
     App\:
         resource: '../src/'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    # Video Learning System Services
+    App\Service\Storage\MinIOService:
+        arguments:
+            $endpoint: '%minio_endpoint%'
+            $rootUser: '%minio_root_user%'
+            $rootPassword: '%minio_root_password%'
+            $region: '%minio_region%'
+            $videoBucket: '%minio_bucket_videos%'
+            $thumbnailBucket: '%minio_bucket_thumbnails%'
+
+    App\Service\Video\VideoTranscodingService:
+        arguments:
+            $ffmpegPath: '%ffmpeg_path%'
+            $ffprobePath: '%ffprobe_path%'
+            $resolutions: '%video_transcoding_resolutions%'
+
+    App\Service\Video\VideoProcessingService:
+        arguments:
+            $tempDir: '%video_temp_dir%'
+

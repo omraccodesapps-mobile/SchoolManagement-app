@@ -1,0 +1,487 @@
+{# Video Player Page #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Watch Video - {{ parent() }}{% endblock %}
+
+{% block content %}
+<link href="https://vjs.zencdn.net/7.20.3/video-js.min.css" rel="stylesheet" />
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Video Player Section -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    <video 
+                        id="videoPlayer" 
+                        class="video-js vjs-default-skin"
+                        controls
+                        preload="auto"
+                        width="100%"
+                        height="auto"
+                        data-setup="{}"
+                    >
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript, and consider upgrading to a
+                            web browser that <a href="https://videojs.com/html5-video-js/">supports HTML5 video</a>
+                        </p>
+                    </video>
+                </div>
+            </div>
+
+            <!-- Video Title and Description -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title" id="videoTitle">Loading...</h1>
+                    <p class="card-text text-muted" id="videoDescription"></p>
+                    <div class="mt-3">
+                        <span class="badge bg-info me-2" id="videoDuration">Duration: -- </span>
+                        <span class="badge bg-success me-2" id="videoStatus">Loading...</span>
+                        <span class="badge bg-secondary" id="uploadedBy">By: --</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Chapters -->
+            <div class="card mb-4" id="chaptersSection" style="display: none;">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bookmark"></i> Chapters
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush" id="chaptersList"></div>
+            </div>
+
+            <!-- Student Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-journal-text"></i> My Notes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="noteInput" 
+                                class="form-control" 
+                                placeholder="Add a note at current timestamp..."
+                            />
+                            <button 
+                                class="btn btn-primary" 
+                                type="button" 
+                                id="addNoteBtn"
+                            >
+                                <i class="bi bi-plus"></i> Add
+                            </button>
+                        </div>
+                        <small class="text-muted">Note will be saved at: <strong id="noteTimestamp">00:00</strong></small>
+                    </div>
+                    <div id="notesList">
+                        <p class="text-muted">No notes yet. Add one above!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quality Selector -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear"></i> Quality
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="qualitySelector"></div>
+                    <small class="text-muted d-block mt-2" id="qualityInfo"></small>
+                </div>
+            </div>
+
+            <!-- Progress Tracking -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Your Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Watched:</span>
+                            <strong id="watchedPercent">0%</strong>
+                        </div>
+                        <div class="progress">
+                            <div 
+                                id="progressBar" 
+                                class="progress-bar" 
+                                role="progressbar" 
+                                style="width: 0%"
+                            ></div>
+                        </div>
+                    </div>
+                    <div class="mb-2" id="completionStatus">
+                        <span class="badge bg-warning">In Progress</span>
+                    </div>
+                    <small class="text-muted">
+                        Last watched: <strong id="lastWatched">Never</strong>
+                    </small>
+                </div>
+            </div>
+
+            <!-- Course Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-book"></i> Course Info
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Course:</strong><br>
+                        <a href="/courses" id="courseName">Loading...</a>
+                    </p>
+                    <p class="mb-0">
+                        <strong>Uploaded by:</strong><br>
+                        <span id="uploadedByName">--</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    const videoId = new URLSearchParams(window.location.search).get('id');
+    
+    if (!videoId) {
+        window.location.href = '/courses';
+        return;
+    }
+
+    let player;
+    let currentTimestamp = 0;
+
+    // Initialize Video.js player
+    function initializePlayer(videoUrl) {
+        player = videojs('videoPlayer', {
+            controls: true,
+            autoplay: false,
+            preload: 'auto',
+            fluid: true,
+            responsive: true,
+            playbackRates: [0.5, 1, 1.25, 1.5, 2],
+        });
+
+        player.src({
+            src: videoUrl,
+            type: 'video/mp4'
+        });
+
+        // Update progress on time update
+        player.on('timeupdate', function() {
+            currentTimestamp = player.currentTime();
+            document.getElementById('noteTimestamp').textContent = formatTime(currentTimestamp);
+            updateProgress();
+        });
+
+        // Update progress when paused
+        player.on('pause', function() {
+            updateProgress();
+        });
+    }
+
+    // Load video metadata
+    async function loadVideoMetadata() {
+        try {
+            const response = await fetch(`/api/video-details/${videoId}/metadata`);
+            const data = await response.json();
+
+            if (data.success) {
+                const video = data.data;
+                
+                // Update video info
+                document.getElementById('videoTitle').textContent = video.title;
+                document.getElementById('videoDescription').textContent = video.description;
+                document.getElementById('videoDuration').textContent = `Duration: ${formatTime(video.duration)}`;
+                document.getElementById('videoStatus').textContent = video.status;
+                document.getElementById('uploadedBy').textContent = `By: ${video.uploadedBy}`;
+                document.getElementById('uploadedByName').textContent = video.uploadedBy;
+
+                // Get streaming URL and initialize player
+                const qualities = video.variants;
+                if (qualities && qualities.length > 0) {
+                    const bestQuality = qualities.find(q => q.resolution === '720p') || qualities[0];
+                    initializePlayer(bestQuality.url);
+                }
+
+                // Load qualities
+                loadQualities(qualities);
+
+                // Load chapters
+                loadChapters(video.chapters);
+
+                // Load progress
+                loadProgress();
+
+                // Load notes
+                loadNotes();
+            }
+        } catch (error) {
+            console.error('Error loading video:', error);
+        }
+    }
+
+    // Load available qualities
+    function loadQualities(qualities) {
+        const selector = document.getElementById('qualitySelector');
+        selector.innerHTML = '';
+
+        if (qualities && qualities.length > 0) {
+            const buttons = qualities.map(q => `
+                <button 
+                    class="btn btn-outline-secondary btn-sm w-100 mb-2 quality-btn" 
+                    data-url="${q.url}"
+                    data-resolution="${q.resolution}"
+                >
+                    ${q.resolution} - ${Math.round(q.bitrate / 1000)} kbps
+                </button>
+            `).join('');
+
+            selector.innerHTML = buttons;
+
+            document.querySelectorAll('.quality-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const currentTime = player.currentTime();
+                    player.src({ src: this.dataset.url, type: 'video/mp4' });
+                    player.currentTime(currentTime);
+                    
+                    // Update UI
+                    document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Select first quality by default
+            document.querySelector('.quality-btn').classList.add('active');
+        }
+    }
+
+    // Load chapters
+    function loadChapters(chapters) {
+        if (chapters && chapters.length > 0) {
+            const chaptersList = document.getElementById('chaptersList');
+            chaptersList.innerHTML = '';
+
+            chapters.forEach(chapter => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'list-group-item list-group-item-action';
+                btn.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <strong>${chapter.title}</strong>
+                        <small class="text-muted">${formatTime(chapter.startTime)} - ${formatTime(chapter.endTime)}</small>
+                    </div>
+                    <small>${chapter.description}</small>
+                `;
+                btn.addEventListener('click', () => {
+                    player.currentTime(chapter.startTime);
+                    player.play();
+                });
+
+                chaptersList.appendChild(btn);
+            });
+
+            document.getElementById('chaptersSection').style.display = 'block';
+        }
+    }
+
+    // Load progress
+    async function loadProgress() {
+        try {
+            const response = await fetch(`/api/video-progress/${videoId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                const progress = data.data;
+                const percent = progress.percentageWatched;
+
+                document.getElementById('watchedPercent').textContent = percent.toFixed(0) + '%';
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('lastWatched').textContent = 
+                    progress.lastWatchedAt > 0 ? formatTime(progress.lastWatchedAt) : 'Never';
+
+                if (progress.completed) {
+                    document.getElementById('completionStatus').innerHTML = 
+                        '<span class="badge bg-success">Completed ✓</span>';
+                } else if (percent > 0) {
+                    document.getElementById('completionStatus').innerHTML = 
+                        '<span class="badge bg-warning">In Progress</span>';
+                }
+
+                // Resume from last position
+                if (progress.lastWatchedAt > 0 && progress.percentageWatched < 95) {
+                    player.currentTime(progress.lastWatchedAt);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading progress:', error);
+        }
+    }
+
+    // Update progress
+    async function updateProgress() {
+        try {
+            const currentTime = player.currentTime();
+            const duration = player.duration();
+            const percentage = (currentTime / duration) * 100;
+
+            await fetch(`/api/video-progress/${videoId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lastWatchedAt: currentTime,
+                    totalWatched: currentTime,
+                    percentageWatched: percentage,
+                    completed: percentage >= 95
+                })
+            });
+        } catch (error) {
+            console.error('Error updating progress:', error);
+        }
+    }
+
+    // Load notes
+    async function loadNotes() {
+        try {
+            const response = await fetch(`/api/video-details/${videoId}/notes`);
+            const data = await response.json();
+
+            if (data.success && data.data.length > 0) {
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = '';
+
+                data.data.forEach(note => {
+                    const div = document.createElement('div');
+                    div.className = 'card mb-2';
+                    div.innerHTML = `
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="mb-1">${note.content}</p>
+                                    <small class="text-muted">
+                                        At ${formatTime(note.timestamp)} • ${new Date(note.createdAt).toLocaleDateString()}
+                                    </small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger delete-note" data-note-id="${note.id}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    notesList.appendChild(div);
+                });
+
+                document.querySelectorAll('.delete-note').forEach(btn => {
+                    btn.addEventListener('click', () => deleteNote(btn.dataset.noteId));
+                });
+            }
+        } catch (error) {
+            console.error('Error loading notes:', error);
+        }
+    }
+
+    // Add note
+    document.getElementById('addNoteBtn').addEventListener('click', async () => {
+        const noteText = document.getElementById('noteInput').value.trim();
+        if (!noteText) {
+            alert('Please enter a note');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/video-details/${videoId}/notes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: noteText,
+                    timestamp: player.currentTime()
+                })
+            });
+
+            if (response.ok) {
+                document.getElementById('noteInput').value = '';
+                loadNotes();
+            }
+        } catch (error) {
+            console.error('Error adding note:', error);
+        }
+    });
+
+    // Delete note
+    async function deleteNote(noteId) {
+        if (!confirm('Delete this note?')) return;
+
+        try {
+            await fetch(`/api/video-details/notes/${noteId}`, { method: 'DELETE' });
+            loadNotes();
+        } catch (error) {
+            console.error('Error deleting note:', error);
+        }
+    }
+
+    // Utility: Format time
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        return [h, m, s].map(x => String(x).padStart(2, '0')).join(':').replace(/^0:/, '');
+    }
+
+    // Load everything
+    loadVideoMetadata();
+});
+</script>
+
+<style>
+.video-js {
+    background-color: #000;
+}
+
+.vjs-control {
+    color: #fff;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.quality-btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+.progress {
+    height: 1.5rem;
+}
+
+#chaptersSection {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.list-group-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

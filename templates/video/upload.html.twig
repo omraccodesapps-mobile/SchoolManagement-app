@@ -1,0 +1,276 @@
+{# Video Upload Form Component #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Upload Video - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-camera-video"></i> Upload Video
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    {% if app.request.query.has('course_id') %}
+                        <form id="videoUploadForm" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" id="courseId" value="{{ app.request.query.get('course_id') }}" />
+                            
+                            <!-- Title -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Video Title *</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="title" 
+                                    name="title" 
+                                    placeholder="Enter video title"
+                                    required
+                                />
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="description" 
+                                    name="description" 
+                                    rows="3"
+                                    placeholder="Enter video description (optional)"
+                                ></textarea>
+                            </div>
+
+                            <!-- File Upload -->
+                            <div class="mb-3">
+                                <label for="videoFile" class="form-label">Video File * (Max 5GB)</label>
+                                <div class="input-group">
+                                    <input 
+                                        type="file" 
+                                        class="form-control" 
+                                        id="videoFile" 
+                                        name="video"
+                                        accept="video/mp4,video/quicktime,video/x-matroska"
+                                        required
+                                    />
+                                    <span class="input-group-text">
+                                        <i class="bi bi-file-earmark-video"></i>
+                                    </span>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Supported formats: MP4, MOV, MKV
+                                </small>
+                            </div>
+
+                            <!-- File Info Display -->
+                            <div id="fileInfo" class="alert alert-info d-none" role="alert">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>File:</strong> <span id="fileName"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Size:</strong> <span id="fileSize"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div id="uploadProgress" class="d-none">
+                                <div class="mb-2 d-flex justify-content-between">
+                                    <span>Uploading...</span>
+                                    <span id="progressPercent">0%</span>
+                                </div>
+                                <div class="progress">
+                                    <div 
+                                        id="progressBar" 
+                                        class="progress-bar progress-bar-striped progress-bar-animated" 
+                                        role="progressbar" 
+                                        style="width: 0%"
+                                    ></div>
+                                </div>
+                            </div>
+
+                            <!-- Processing Status -->
+                            <div id="processingStatus" class="alert alert-info d-none" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                                        <span class="visually-hidden">Processing...</span>
+                                    </div>
+                                    <div>
+                                        <strong>Processing Video</strong>
+                                        <p class="mb-0 small">Your video is being transcoded to multiple resolutions. This may take a few minutes.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Success Message -->
+                            <div id="successMessage" class="alert alert-success d-none" role="alert">
+                                <h4 class="alert-heading">Success!</h4>
+                                <p>Video uploaded successfully and queued for processing.</p>
+                                <hr>
+                                <p class="mb-0">
+                                    <a href="/videos/course/{{ app.request.query.get('course_id') }}" class="btn btn-sm btn-success">
+                                        View Course Videos
+                                    </a>
+                                </p>
+                            </div>
+
+                            <!-- Error Message -->
+                            <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+                                <strong>Error:</strong> <span id="errorText"></span>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="mt-4 d-flex gap-2">
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-primary" 
+                                    id="submitBtn"
+                                    disabled
+                                >
+                                    <i class="bi bi-cloud-upload"></i> Upload Video
+                                </button>
+                                <a 
+                                    href="/courses/{{ app.request.query.get('course_id') }}" 
+                                    class="btn btn-secondary"
+                                >
+                                    <i class="bi bi-arrow-left"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            No course selected. Please select a course to upload a video.
+                        </div>
+                        <a href="/courses" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> Back to Courses
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('videoUploadForm');
+    const fileInput = document.getElementById('videoFile');
+    const titleInput = document.getElementById('title');
+    const submitBtn = document.getElementById('submitBtn');
+    const courseId = document.getElementById('courseId')?.value;
+
+    // Handle file selection
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+            
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = fileSize + ' MB';
+            document.getElementById('fileInfo').classList.remove('d-none');
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+        } else {
+            document.getElementById('fileInfo').classList.add('d-none');
+            submitBtn.disabled = true;
+        }
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('video', fileInput.files[0]);
+        formData.append('title', titleInput.value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('course_id', courseId);
+
+        // Hide previous messages
+        document.getElementById('errorMessage').classList.add('d-none');
+        document.getElementById('successMessage').classList.add('d-none');
+        
+        // Show progress
+        document.getElementById('uploadProgress').classList.remove('d-none');
+        submitBtn.disabled = true;
+
+        try {
+            const xhr = new XMLHttpRequest();
+
+            // Track upload progress
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    document.getElementById('progressBar').style.width = percentComplete + '%';
+                    document.getElementById('progressPercent').textContent = Math.round(percentComplete) + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                if (xhr.status === 201) {
+                    const response = JSON.parse(xhr.responseText);
+                    
+                    // Hide progress and show processing status
+                    document.getElementById('uploadProgress').classList.add('d-none');
+                    document.getElementById('processingStatus').classList.remove('d-none');
+                    
+                    // Show success after a delay
+                    setTimeout(() => {
+                        document.getElementById('processingStatus').classList.add('d-none');
+                        document.getElementById('successMessage').classList.remove('d-none');
+                    }, 2000);
+                } else {
+                    const response = JSON.parse(xhr.responseText);
+                    showError(response.message || 'Upload failed');
+                    document.getElementById('uploadProgress').classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                showError('Network error occurred during upload');
+                document.getElementById('uploadProgress').classList.add('d-none');
+                submitBtn.disabled = false;
+            });
+
+            xhr.open('POST', '/api/videos/upload');
+            xhr.send(formData);
+
+        } catch (error) {
+            showError(error.message);
+            document.getElementById('uploadProgress').classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    });
+
+    function showError(message) {
+        document.getElementById('errorText').textContent = message;
+        document.getElementById('errorMessage').classList.remove('d-none');
+    }
+});
+</script>
+
+<style>
+#videoUploadForm {
+    max-width: 100%;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.bi {
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}

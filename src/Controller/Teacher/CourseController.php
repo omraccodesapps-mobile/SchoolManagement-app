@@ -3,12 +3,17 @@
 namespace App\Controller\Teacher;
 
 use App\Entity\Course;
+use App\Entity\Video;
 use App\Form\CourseType;
+use App\Messenger\Message\ProcessVideoMessage;
 use App\Repository\CourseRepository;
+use App\Service\Video\VideoUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -16,6 +21,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_TEACHER')]
 class CourseController extends AbstractController
 {
+    public function __construct(
+        private VideoUploadService $videoUploadService,
+        private MessageBusInterface $messageBus,
+    ) {
+    }
+
     #[Route('', name: 'app_course_index', methods: ['GET'])]
     public function index(CourseRepository $courseRepository): Response
     {
@@ -34,12 +45,40 @@ class CourseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $course->setTeacher($this->getUser());
-            $em->persist($course);
-            $em->flush();
+            try {
+                $course->setTeacher($this->getUser());
+                $em->persist($course);
+                $em->flush();
 
-            $this->addFlash('success', 'Course created successfully!');
-            return $this->redirectToRoute('app_course_index');
+                // Handle video upload if provided
+                /** @var UploadedFile|null $videoFile */
+                $videoFile = $form->get('video')->getData();
+
+                if ($videoFile) {
+                    $videoTitle = $course->getTitle() . ' - Introduction';
+
+                    // Upload the video using VideoUploadService
+                    $video = $this->videoUploadService->uploadVideo(
+                        $videoFile,
+                        $course,
+                        $this->getUser(),
+                        $videoTitle,
+                        'Introduction video for ' . $course->getTitle()
+                    );
+
+                    // Dispatch processing message for background video processing
+                    $this->messageBus->dispatch(new ProcessVideoMessage($video->getId()));
+
+                    $this->addFlash('success', 'Course created successfully! Video is being processed.');
+                } else {
+                    $this->addFlash('success', 'Course created successfully!');
+                }
+
+                return $this->redirectToRoute('app_course_show', ['id' => $course->getId()]);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Error creating course: ' . $e->getMessage());
+                return $this->redirectToRoute('app_course_new');
+            }
         }
 
         return $this->render('teacher/course/new.html.twig', [
@@ -83,7 +122,7 @@ class CourseController extends AbstractController
     {
         $this->denyAccessUnlessGranted('DELETE', $course);
 
-        if ($this->isCsrfTokenValid('delete'.$course->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $course->getId(), $request->request->get('_token'))) {
             $em->remove($course);
             $em->flush();
             $this->addFlash('success', 'Course deleted successfully!');
