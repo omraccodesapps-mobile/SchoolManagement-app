@@ -41,7 +41,7 @@ jobs:
           restore-keys: composer-
 
       - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --no-suggest
+        run: composer install --no-interaction --prefer-dist
 
       - name: Display PHP version
         run: php -v
