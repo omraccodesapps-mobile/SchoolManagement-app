@@ -1,4 +1,6 @@
 {
+    "name": "school-management/app",
+    "description": "School Management System - Complete application for managing school operations",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",

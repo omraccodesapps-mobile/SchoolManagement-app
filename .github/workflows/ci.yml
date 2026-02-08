@@ -11,7 +11,7 @@ on:
 
 env:
   APP_ENV: test
-  DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+  DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
 
 jobs:
   # ============================================================================
@@ -126,19 +126,19 @@ jobs:
       - name: Create SQLite database
         run: php bin/console doctrine:database:create --if-not-exists
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Run database migrations
         run: php bin/console doctrine:migrations:migrate --no-interaction
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Load test fixtures
         run: php bin/console doctrine:fixtures:load --no-interaction
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
   # ============================================================================
@@ -176,25 +176,25 @@ jobs:
       - name: Create test database
         run: php bin/console doctrine:database:create --if-not-exists
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Run migrations
         run: php bin/console doctrine:migrations:migrate --no-interaction
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Load fixtures
         run: php bin/console doctrine:fixtures:load --no-interaction
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Run PHPUnit tests with coverage
         run: php bin/phpunit --coverage-text --coverage-clover coverage.xml
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Check code coverage
@@ -207,7 +207,7 @@ jobs:
           fi
           echo "✅ Code coverage meets minimum threshold"
         env:
-          DATABASE_URL: "sqlite:///%github.workspace%/var/data/school_management_test.db"
+          DATABASE_URL: "sqlite:///${{ github.workspace }}/var/data/school_management_test.db"
           APP_ENV: test
 
       - name: Upload coverage reports
