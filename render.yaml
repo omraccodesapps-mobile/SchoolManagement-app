@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: school-management
+    env: php
+    plan: free
+    buildCommand: |
+      set -e
+      echo "🔧 Clearing existing cache..."
+      rm -rf var/cache/* var/log/* 2>/dev/null || true
+      
+      echo "📦 Installing PHP dependencies..."
+      composer install --no-dev --optimize-autoloader --no-interaction
+      
+      echo "🗄️ Setting up database..."
+      mkdir -p var/data
+      php bin/console doctrine:database:create --if-not-exists 2>/dev/null || true
+      php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
+      
+      echo "🚀 Warming up cache..."
+      php bin/console cache:warmup --env=prod 2>/dev/null || true
+      
+      echo "📁 Compiling assets..."
+      php bin/console asset-map:compile 2>/dev/null || true
+      
+      echo "✅ Build complete!"
+    
+    startCommand: php bin/console server:start 0.0.0.0:10000
+    
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        value: "sqlite:///%kernel.project_dir%/var/data/school.db"
+      - key: MAILER_DSN
+        value: "null://null"
+      - key: MESSENGER_TRANSPORT_DSN
+        value: "doctrine://default?auto_setup=0"
+      - key: APP_SECRET
+        generateValue: true
+

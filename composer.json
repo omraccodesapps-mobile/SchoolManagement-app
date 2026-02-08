@@ -88,6 +88,13 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
+        "render-build": [
+            "rm -rf var/cache/* var/log/* || true",
+            "composer install --no-dev --optimize-autoloader",
+            "php bin/console doctrine:migrations:migrate --no-interaction || true",
+            "php bin/console cache:warmup --env=prod || true",
+            "php bin/console asset-map:compile || true"
+        ],
         "cs-check": "php-cs-fixer fix src --dry-run --diff --ansi",
         "cs-fix": "php-cs-fixer fix src --ansi",
         "stan": "phpstan analyse src --level=5"
