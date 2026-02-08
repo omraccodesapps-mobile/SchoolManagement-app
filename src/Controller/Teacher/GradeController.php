@@ -94,8 +94,8 @@ class GradeController extends AbstractController
     #[Route('/add', name: 'app_grade_add', methods: ['GET', 'POST'])]
     #[Route('/course/{courseId}/add', name: 'app_grade_add_course', methods: ['GET', 'POST'])]
     public function add(
-        ?int $courseId = null,
         Request $request,
+        ?int $courseId = null,
     ): Response {
         $course = null;
         if ($courseId && $courseId > 0) {
