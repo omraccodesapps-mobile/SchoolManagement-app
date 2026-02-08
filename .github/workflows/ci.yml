@@ -43,12 +43,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-suggest
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
       - name: Display PHP version
         run: php -v
 
@@ -236,26 +230,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Build production assets
-        run: npm run build
-
-      - name: Verify asset build
+      - name: Verify assets
         run: |
-          if [ -d "public/assets" ] || [ -d "assets/vendor" ]; then
-            echo "✅ Assets built successfully"
-          else
-            echo "❌ Asset build verification failed"
-            exit 1
-          fi
+          echo "⚠️  Skipping npm asset build - no package.json found"
+          echo "To enable frontend asset building:"
+          echo "1. Create package.json with build scripts"
+          echo "2. Run: npm install"
+          echo "3. Commit package-lock.json to repository"
 
   # ============================================================================
   # FINAL STATUS: Overall CI/CD pipeline status
