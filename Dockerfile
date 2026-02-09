@@ -52,17 +52,21 @@ RUN mkdir -p /app/var/data /app/var/cache /app/var/log && \
     mkdir -p /app/public && \
     chown -R www-data:www-data /app && \
     chmod -R 755 /app && \
-    chmod -R 775 /app/var
+    chmod -R 775 /app/var && \
+    chmod +x /app/build.sh
+
+# Run initialization as root before switching to www-data
+RUN cd /app && ./build.sh || true
 
 # Install dumb-init for signal handling
 RUN apk add --no-cache dumb-init
 
 USER www-data
 
-WORKDIR /app/public
+WORKDIR /app
 
 EXPOSE 8080
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["php", "-S", "0.0.0.0:8080"]
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
