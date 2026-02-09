@@ -7,6 +7,7 @@ use App\Entity\Enrollment;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -31,6 +32,7 @@ class PdfControllerTest extends WebTestCase
 
     public function testStudentBulletinPdfGeneration(): void
     {
+        /** @var KernelBrowser $client */
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
@@ -89,6 +91,7 @@ class PdfControllerTest extends WebTestCase
 
     public function testStudentBulletinNotEnrolled(): void
     {
+        /** @var KernelBrowser $client */
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
@@ -129,6 +132,7 @@ class PdfControllerTest extends WebTestCase
 
     public function testCourseReportPdfGeneration(): void
     {
+        /** @var KernelBrowser $client */
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
@@ -162,6 +166,7 @@ class PdfControllerTest extends WebTestCase
 
     public function testCourseReportNotTeacher(): void
     {
+        /** @var KernelBrowser $client */
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
@@ -202,6 +207,7 @@ class PdfControllerTest extends WebTestCase
 
     public function testCourseReportNotYourCourse(): void
     {
+        /** @var KernelBrowser $client */
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
