@@ -65,7 +65,7 @@
         
         <!-- All Tests: Complete test suite (excludes subdirs to avoid duplicates) -->
         <testsuite name="Project Test Suite">
-            <file>tests/bootstrap.php</file>
+            <!-- Removed invalid bootstrap file entry -->
         </testsuite>
     </testsuites>
 
@@ -100,7 +100,8 @@
     <!-- ========================================================================
          Report Configuration: Coverage report formats
          ======================================================================== -->
-    <coverage pathCoverage="false"
+    <!-- Code coverage is disabled because no coverage driver (Xdebug/PCOV) is available. -->
+    <!-- <coverage pathCoverage="false"
               ignoreDeprecatedCodeUnits="true"
     >
         <report>
@@ -108,7 +109,7 @@
             <html outputDirectory="var/coverage/html" />
             <clover outputFile="var/coverage/clover.xml" />
         </report>
-    </coverage>
+    </coverage> -->
 
     <!-- ========================================================================
          Extensions: Additional functionality

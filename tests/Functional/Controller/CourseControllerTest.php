@@ -22,7 +22,17 @@ class CourseControllerTest extends WebTestCase
 
     public function testCourseShowRequiresAuthentication(): void
     {
-        $this->client->request('GET', '/teacher/courses/1');
+        // Create a Course entity in the test database
+        $kernel = self::bootKernel();
+        $entityManager = $kernel->getContainer()->get('doctrine')->getManager();
+
+        $course = new \App\Entity\Course();
+        $course->setTitle('Test Course');
+        $entityManager->persist($course);
+        $entityManager->flush();
+        $courseId = $course->getId();
+
+        $this->client->request('GET', "/teacher/courses/{$courseId}");
         $this->assertResponseRedirects('/login');
     }
 
@@ -35,8 +45,18 @@ class CourseControllerTest extends WebTestCase
 
     public function testCourseDeleteRequiresOwnership(): void
     {
-        // Student trying to delete teacher course should get 403
-        $this->client->request('POST', '/teacher/courses/1/delete');
+        // Create a Course entity in the test database
+        $kernel = self::bootKernel();
+        $entityManager = $kernel->getContainer()->get('doctrine')->getManager();
+
+        $course = new \App\Entity\Course();
+        $course->setTitle('Test Course for Delete');
+        $entityManager->persist($course);
+        $entityManager->flush();
+        $courseId = $course->getId();
+
+        // Student trying to delete teacher course should get 403 (or redirected to login if not authenticated)
+        $this->client->request('POST', "/teacher/courses/{$courseId}/delete");
         $this->assertResponseRedirects('/login');
     }
 }

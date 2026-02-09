@@ -16,7 +16,7 @@ class PdfControllerTest extends WebTestCase
     {
         $connection = $em->getConnection();
         $platform = $connection->getDatabasePlatform();
-        
+
         if ($platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform) {
             $connection->executeStatement('PRAGMA foreign_keys=OFF');
             $schemaManager = $connection->createSchemaManager();

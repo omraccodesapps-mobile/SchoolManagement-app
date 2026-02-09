@@ -63,8 +63,9 @@ class GradeRepositoryTest extends KernelTestCase
         $course->setTitle('Course A');
         $course->setDescription('Description A');
 
+        // Use a unique email for each test run
         $student = new User();
-        $student->setEmail('student@test.com');
+        $student->setEmail('student_' . uniqid() . '@test.com');
         $student->setPassword('hashed');
         $student->setName('Test Student');
         $student->setRoles(['ROLE_STUDENT']);
@@ -91,7 +92,7 @@ class GradeRepositoryTest extends KernelTestCase
     public function testFindByStudentAndCourse(): void
     {
         $student = new User();
-        $student->setEmail('student2@test.com');
+        $student->setEmail('student_' . uniqid() . '@test.com');
         $student->setPassword('hashed');
         $student->setName('Test Student 2');
         $student->setRoles(['ROLE_STUDENT']);
