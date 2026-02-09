@@ -3,22 +3,18 @@ FROM php:8.2-fpm-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies and system libraries
+# Install system dependencies for Composer and build
 RUN apk add --no-cache \
     git \
     curl \
     bash \
     build-base \
-    pkgconf \
     zlib-dev \
-    libzip-dev \
-    sqlite-dev \
-    oniguruma-dev
+    libzip-dev
 
-# Install PHP extensions
+# Configure PHP extensions (already included in base image)
 RUN docker-php-ext-install \
-    zip \
-    pdo_sqlite
+    zip
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -32,7 +28,7 @@ RUN composer install --prefer-dist --no-progress --no-interaction --no-dev --opt
 # Copy application
 COPY . .
 
-# Copy build script and make it executable
+# Copy and make build script executable
 COPY build.sh build.sh
 RUN chmod +x build.sh
 
@@ -41,7 +37,7 @@ FROM php:8.2-fpm-alpine
 
 WORKDIR /app
 
-# Install runtime dependencies
+# Install runtime dependencies only
 RUN apk add --no-cache \
     curl \
     bash \
