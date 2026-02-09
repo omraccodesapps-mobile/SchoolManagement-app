@@ -12,18 +12,25 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class PdfControllerTest extends WebTestCase
 {
-    public static function setUpBeforeClass(): void
+    private static bool $schemaInitialized = false;
+
+    protected function setUp(): void
     {
-        parent::setUpBeforeClass();
-        self::initializeDatabase();
+        parent::setUp();
+
+        if (!self::$schemaInitialized) {
+            // Create client first to boot kernel properly
+            $client = static::createClient();
+            self::initializeDatabase();
+            self::$schemaInitialized = true;
+        }
     }
 
     private static function initializeDatabase(): void
     {
         try {
-            // Boot kernel once for database initialization
-            $kernel = self::bootKernel();
-            $em = $kernel->getContainer()->get(EntityManagerInterface::class);
+            // Get kernel from container that's already booted via createClient()
+            $em = static::getContainer()->get(EntityManagerInterface::class);
             $connection = $em->getConnection();
 
             // Drop and recreate all tables
