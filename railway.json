@@ -1,0 +1,22 @@
+{
+  "build": {
+    "builder": "dockerfile"
+  },
+  "deploy": {
+    "startCommand": "php -S 0.0.0.0:8080 -t public",
+    "numReplicas": 1,
+    "restartPolicy": "on_failure",
+    "healthchecks": {
+      "readiness": {
+        "initialDelaySeconds": 10,
+        "periodSeconds": 10,
+        "timeoutSeconds": 5,
+        "successThreshold": 1,
+        "failureThreshold": 3,
+        "exec": {
+          "command": ["php", "-r", "exit(file_exists('/app/var/cache') ? 0 : 1);"]
+        }
+      }
+    }
+  }
+}
