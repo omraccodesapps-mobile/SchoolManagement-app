@@ -56,7 +56,10 @@ RUN mkdir -p /app/var/data /app/var/cache /app/var/log && \
     chmod +x /app/build.sh
 
 # Run initialization as root before switching to www-data
-RUN cd /app && ./build.sh || true
+RUN APP_ENV=prod APP_DEBUG=false DATABASE_URL="sqlite:///%kernel.project_dir%/var/data/school.db" \
+    php bin/console doctrine:database:create --if-not-exists || true && \
+    php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true && \
+    php bin/console cache:warmup --env=prod || true
 
 # Install dumb-init for signal handling
 RUN apk add --no-cache dumb-init
