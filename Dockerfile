@@ -12,6 +12,7 @@ RUN apk add --no-cache \
     zlib-dev \
     libzip-dev \
     sqlite-dev \
+    sqlite3 \
     oniguruma-dev
 
 # Install PHP extensions
@@ -46,11 +47,6 @@ RUN apk add --no-cache \
     bash \
     sqlite-libs \
     libzip
-
-# Install PHP extensions (pdo and sqlite3 are built-in, just recompile with libraries)
-RUN docker-php-ext-install \
-    zip \
-    pdo_sqlite
 
 # Copy from builder
 COPY --from=builder /app /app
