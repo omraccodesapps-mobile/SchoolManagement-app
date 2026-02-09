@@ -9,10 +9,10 @@ RUN apk add --no-cache \
     curl \
     bash \
     build-base \
+    pkgconf \
     zlib-dev \
     libzip-dev \
     sqlite-dev \
-    sqlite3 \
     oniguruma-dev
 
 # Install PHP extensions
