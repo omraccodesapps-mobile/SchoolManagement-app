@@ -12,46 +12,20 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class PdfControllerTest extends WebTestCase
 {
-    private static bool $schemaInitialized = false;
-
-    protected function setUp(): void
+    private function clearDatabase(EntityManagerInterface $em): void
     {
-        parent::setUp();
+        $connection = $em->getConnection();
+        $platform = $connection->getDatabasePlatform();
+        
+        if ($platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform) {
+            $connection->executeStatement('PRAGMA foreign_keys=OFF');
+            $schemaManager = $connection->createSchemaManager();
+            $tables = $schemaManager->listTableNames();
 
-        if (!self::$schemaInitialized) {
-            // Create client first to boot kernel properly
-            $client = static::createClient();
-            self::initializeDatabase();
-            self::$schemaInitialized = true;
-        }
-    }
-
-    private static function initializeDatabase(): void
-    {
-        try {
-            // Get kernel from container that's already booted via createClient()
-            $em = static::getContainer()->get(EntityManagerInterface::class);
-            $connection = $em->getConnection();
-
-            // Drop and recreate all tables
-            $platform = $connection->getDatabasePlatform();
-            if ($platform instanceof \Doctrine\DBAL\Platforms\SqlitePlatform) {
-                $connection->executeStatement('PRAGMA foreign_keys=OFF');
-                $schemaManager = $connection->createSchemaManager();
-                $tables = $schemaManager->listTableNames();
-
-                foreach ($tables as $table) {
-                    $connection->executeStatement("DROP TABLE IF EXISTS $table");
-                }
-                $connection->executeStatement('PRAGMA foreign_keys=ON');
+            foreach ($tables as $table) {
+                $connection->executeStatement("DELETE FROM $table");
             }
-
-            // Create schema
-            $schemaTool = new SchemaTool($em);
-            $metadata = $em->getMetadataFactory()->getAllMetadata();
-            $schemaTool->createSchema($metadata);
-        } catch (\Exception $e) {
-            // Schema already exists or error, continue anyway
+            $connection->executeStatement('PRAGMA foreign_keys=ON');
         }
     }
 
@@ -60,6 +34,8 @@ class PdfControllerTest extends WebTestCase
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $this->clearDatabase($em);
 
         // Create test student
         $student = new User();
@@ -117,6 +93,8 @@ class PdfControllerTest extends WebTestCase
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
+        $this->clearDatabase($em);
+
         $student = new User();
         $student->setEmail('student2@test.com');
         $student->setName('Test Student 2');
@@ -155,6 +133,8 @@ class PdfControllerTest extends WebTestCase
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
+        $this->clearDatabase($em);
+
         $teacher = new User();
         $teacher->setEmail('teacher3@test.com');
         $teacher->setName('Test Teacher 3');
@@ -185,6 +165,8 @@ class PdfControllerTest extends WebTestCase
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $this->clearDatabase($em);
 
         $student = new User();
         $student->setEmail('student3@test.com');
@@ -223,6 +205,8 @@ class PdfControllerTest extends WebTestCase
         $client = static::createClient();
         $em = static::getContainer()->get(EntityManagerInterface::class);
         $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+
+        $this->clearDatabase($em);
 
         $teacher1 = new User();
         $teacher1->setEmail('teacher5@test.com');
