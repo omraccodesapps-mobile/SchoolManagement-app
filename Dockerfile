@@ -63,8 +63,6 @@ RUN mkdir -p /app/var/data /app/var/cache /app/var/log && \
 # Initialize database as root
 RUN APP_ENV=prod APP_DEBUG=false DATABASE_URL="sqlite:///%kernel.project_dir%/var/data/school.db" \
     bash -c 'set -e; \
-    echo "Creating database..."; \
-    php bin/console doctrine:database:create --if-not-exists 2>&1; \
     echo "Running migrations..."; \
     php bin/console doctrine:migrations:migrate --no-interaction 2>&1; \
     echo "Warming cache..."; \
