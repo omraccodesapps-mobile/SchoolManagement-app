@@ -3,7 +3,7 @@
     "builder": "dockerfile"
   },
   "deploy": {
-    "startCommand": "php -S 0.0.0.0:8080 -t public",
+    "startCommand": "php bin/console cache:clear --no-warmup && php bin/console cache:warmup && php -S 0.0.0.0:$PORT -t public",
     "numReplicas": 1,
     "restartPolicy": "on_failure",
     "healthchecks": {
