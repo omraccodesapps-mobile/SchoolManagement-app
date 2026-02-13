@@ -25,10 +25,18 @@ class HomeController extends AbstractController
 
         // Show homepage for anonymous users
         $stats = [
-            'total_courses' => $courseRepository->count([]),
-            'total_users' => $userRepository->count([]),
-            'recent_courses' => $courseRepository->findBy([], ['id' => 'DESC'], 6),
+            'total_courses' => 0,
+            'total_users' => 0,
+            'recent_courses' => [],
         ];
+
+        try {
+            $stats['total_courses'] = $courseRepository->count([]);
+            $stats['total_users'] = $userRepository->count([]);
+            $stats['recent_courses'] = $courseRepository->findBy([], ['id' => 'DESC'], 6);
+        } catch (\Throwable) {
+            // Keep homepage available even when the database is not initialized yet.
+        }
 
         return $this->render('home/index.html.twig', $stats);
     }
