@@ -3,10 +3,32 @@
     "builder": "dockerfile"
   },
   "deploy": {
-    "startCommand": "/start.sh",
+    "startCommand": "bash /start.sh",
     "numReplicas": 1,
     "restartPolicy": "on_failure",
     "healthcheckPath": "/",
     "healthcheckTimeout": 100
+  },
+  "variables": {
+    "APP_ENV": {
+      "description": "Symfony environment - MUST be 'prod' for production",
+      "value": "prod"
+    },
+    "APP_DEBUG": {
+      "description": "Enable Symfony debugging - MUST be '0' in production",
+      "value": "0"
+    },
+    "APP_SECRET": {
+      "description": "Symfony application secret - generate a random string",
+      "showValue": false
+    },
+    "DATABASE_URL": {
+      "description": "Database connection string - use SQLite for simplicity or connect to external DB",
+      "value": "sqlite:///%kernel.project_dir%/var/data/school_management_prod.db"
+    },
+    "DEFAULT_URI": {
+      "description": "Default URI for CLI commands",
+      "value": "https://school-management-production-1378.up.railway.app"
+    }
   }
 }
