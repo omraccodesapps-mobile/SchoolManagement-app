@@ -9,7 +9,7 @@
     "numReplicas": 1,
     "startCommand": "/start.sh",
     "restartPolicy": "on_failure",
-    "healthcheckPath": "/",
+    "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "sleepApplication": false
   },
