@@ -5,14 +5,16 @@ echo "╔═══════════════════════�
 echo "║  🚀 School Management App - Railway Production    ║"
 echo "╚════════════════════════════════════════════════════╝"
 
-# Set production environment variables
+# Set production environment variables (MUST be available to all child processes)
 export PORT=${PORT:-8080}
 export APP_ENV=${APP_ENV:-prod}
 export APP_DEBUG=${APP_DEBUG:-0}
 export APP_SECRET=${APP_SECRET:-}
+export PHP_FPM_CMD="php-fpm -F"
 
 echo "📡 Port: $PORT"
 echo "🔧 Environment: $APP_ENV"
+echo "🔐 APP_SECRET configured: $([ -z "$APP_SECRET" ] && echo 'NO - MUST SET IN RAILWAY' || echo 'YES')"
 
 # Validate PORT is a valid number
 if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
@@ -20,12 +22,8 @@ if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; th
     exit 1
 fi
 
-# Set PHP-FPM command
-export PHP_FPM_CMD="php-fpm -F"
-
-# Create socket directory for PHP-FPM
-mkdir -p /run
-chown www-data:www-data /run
+# Note: Using TCP socket (127.0.0.1:9000) - no Unix socket directory needed
+# The /run directory is system-managed and should not be modified
 
 # Setup Symfony directories
 cd /var/www/app

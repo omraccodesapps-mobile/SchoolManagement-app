@@ -3,7 +3,6 @@
     "builder": "dockerfile"
   },
   "deploy": {
-    "startCommand": "bash /start.sh",
     "numReplicas": 1,
     "restartPolicy": "on_failure",
     "healthcheckPath": "/",
