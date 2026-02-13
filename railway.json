@@ -3,20 +3,10 @@
     "builder": "dockerfile"
   },
   "deploy": {
-    "startCommand": "php bin/console cache:clear --no-warmup && php bin/console cache:warmup && php -S 0.0.0.0:$PORT -t public",
+    "startCommand": "/start.sh",
     "numReplicas": 1,
     "restartPolicy": "on_failure",
-    "healthchecks": {
-      "readiness": {
-        "initialDelaySeconds": 10,
-        "periodSeconds": 10,
-        "timeoutSeconds": 5,
-        "successThreshold": 1,
-        "failureThreshold": 3,
-        "exec": {
-          "command": ["php", "-r", "exit(file_exists('/app/var/cache') ? 0 : 1);"]
-        }
-      }
-    }
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100
   }
 }
