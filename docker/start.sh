@@ -145,7 +145,7 @@ echo ""
 # Initialize log directories
 # ============================================================================
 mkdir -p /var/log/supervisor /var/log/php-fpm /var/log/nginx
-chmod 777 /var/log/nginx
+chmod 777 /var/log/nginx /var/log/supervisor
 
 # ============================================================================
 # Start log streaming in background
@@ -156,6 +156,10 @@ chmod 777 /var/log/nginx
     sleep 2
     tail -f /var/log/nginx/error.log 2>/dev/null &
     tail -f /var/log/nginx/access.log 2>/dev/null &
+    tail -f /var/log/supervisor/nginx_stderr.log 2>/dev/null &
+    tail -f /var/log/supervisor/nginx_stdout.log 2>/dev/null &
+    tail -f /var/log/supervisor/php-fpm_stderr.log 2>/dev/null &
+    tail -f /var/log/supervisor/php-fpm_stdout.log 2>/dev/null &
     wait
 ) &
 
