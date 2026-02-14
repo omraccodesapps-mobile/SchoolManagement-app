@@ -19,9 +19,17 @@ if [ -z "$APP_SECRET" ]; then
 fi
 export PHP_FPM_CMD="php-fpm -F"
 
+# Ensure APP_SECRET exists to avoid Symfony 500 errors in production
+if [ -z "$APP_SECRET" ]; then
+    echo "⚠️  APP_SECRET is not set. Generating ephemeral secret for this container."
+    APP_SECRET=$(php -r "echo bin2hex(random_bytes(32));")
+    export APP_SECRET
+fi
+
 echo "📡 Port: $PORT"
 echo "🔧 Environment: $APP_ENV"
 echo "🔐 APP_DEBUG: $APP_DEBUG"
+echo "✅ APP_SECRET configured"
 
 # Validate PORT is a valid number
 if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then

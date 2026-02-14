@@ -57,12 +57,16 @@ RUN mkdir -p var/cache var/log var/data public/uploads && \
     chmod -R 755 /var/www/app && \
     chmod -R 775 var/cache var/log var/data
 
-# Warm up cache for production (Symfony 7.4+)
-RUN php bin/console cache:clear --no-warmup --env=prod && \
+# Generate temporary APP_SECRET for build (will be overridden at runtime)
+RUN export APP_SECRET=$(php -r "echo bin2hex(random_bytes(32));") && \
+    export APP_DEBUG=0 && \
+    php bin/console cache:clear --no-warmup --env=prod && \
     php bin/console cache:warmup --env=prod
 
 # Initialize database if SQLite file doesn't exist
-RUN php bin/console doctrine:database:create --if-not-exists --env=prod --no-interaction 2>/dev/null || true && \
+RUN export APP_SECRET=$(php -r "echo bin2hex(random_bytes(32));") && \
+    export APP_DEBUG=0 && \
+    php bin/console doctrine:database:create --if-not-exists --env=prod --no-interaction 2>/dev/null || true && \
     php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod 2>/dev/null || true
 
 # Copy production configuration files
