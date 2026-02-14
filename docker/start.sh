@@ -145,6 +145,19 @@ echo ""
 # Initialize log directories
 # ============================================================================
 mkdir -p /var/log/supervisor /var/log/php-fpm /var/log/nginx
+chmod 777 /var/log/nginx
+
+# ============================================================================
+# Start log streaming in background
+# This ensures Nginx and PHP-FPM logs appear in Railway logs
+# ============================================================================
+(
+    # Wait for log files to be created, then stream them
+    sleep 2
+    tail -f /var/log/nginx/error.log 2>/dev/null &
+    tail -f /var/log/nginx/access.log 2>/dev/null &
+    wait
+) &
 
 # ============================================================================
 # STARTUP COMPLETE - Start Supervisor

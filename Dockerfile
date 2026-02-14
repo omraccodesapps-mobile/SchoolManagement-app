@@ -80,10 +80,11 @@ COPY . .
 # ============================================================================
 # Create required directories with correct permissions
 # ============================================================================
-RUN mkdir -p var/cache var/log var/data var/sessions public/uploads && \
+RUN mkdir -p var/cache var/log var/data var/sessions public/uploads /var/log/nginx && \
     chown -R www-data:www-data /var/www/app && \
     chmod -R 755 /var/www/app && \
-    chmod -R 775 var/cache var/log var/data var/sessions
+    chmod -R 775 var/cache var/log var/data var/sessions && \
+    chmod 755 /var/log/nginx
 
 # ============================================================================
 # Pre-build cache warmup (with error visibility)
