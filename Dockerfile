@@ -80,11 +80,12 @@ COPY . .
 # ============================================================================
 # Create required directories with correct permissions
 # ============================================================================
-RUN mkdir -p var/cache var/log var/data var/sessions public/uploads /var/log/nginx && \
+RUN mkdir -p var/cache var/log var/data var/sessions public/uploads /var/log/nginx /var/run/supervisor /var/run/nginx && \
     chown -R www-data:www-data /var/www/app && \
     chmod -R 755 /var/www/app && \
     chmod -R 775 var/cache var/log var/data var/sessions && \
-    chmod 755 /var/log/nginx
+    chmod 755 /var/log/nginx && \
+    chmod 777 /var/run/supervisor /var/run/nginx
 
 # ============================================================================
 # Pre-build cache warmup (with error visibility)
@@ -146,8 +147,8 @@ EXPOSE 8080
 # ============================================================================
 # Health check - verify Nginx responds to requests
 # ============================================================================
-HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -sf http://localhost:8080/health > /dev/null 2>&1 || exit 1
 
 # ============================================================================
 # Start container with Supervisor (manages PHP-FPM and Nginx)

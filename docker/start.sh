@@ -12,6 +12,15 @@ echo "╚═══════════════════════�
 echo ""
 
 # ============================================================================
+# CRITICAL FIX: Create /var/run directories for PID files and sockets
+# This prevents "Permission denied" errors on Railway
+# ============================================================================
+mkdir -p /var/run/supervisor /var/run/nginx
+chmod 777 /var/run/supervisor /var/run/nginx
+echo "[STARTUP] Configured /var/run directories for PID files"
+echo ""
+
+# ============================================================================
 # Set critical environment variables (MUST be available to all child processes)
 # ============================================================================
 export PORT=${PORT:-8080}
